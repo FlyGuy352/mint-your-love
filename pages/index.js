@@ -7,7 +7,7 @@ export default function Home() {
     <div>
       <HeroImage />
 
-      <div className='pt-10 grid md:grid-cols-3 text-center gap-6'>
+      <div className='pt-10 grid md:grid-cols-3 mx-auto w-4/5 gap-6'>
         <div>
           <Image src={mealImg} alt='' height='305' width='428' />
         </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { AiFillHome, AiOutlineClose, AiOutlineMenu } from 'react-icons/ai';
@@ -22,7 +22,7 @@ export default function Navbar() {
                 </div>
                 <div className='hidden md:flex items-center justify-between basis-full'>
                     <Link href='/'><div className='flex items-center cursor-pointer text-crimsonRed font-Kodchasan text-sm hover:font-bold'><AiFillHome color='#DC143C' /> Home</div></Link>
-                    <Link href='/'><div className='flex items-center cursor-pointer text-crimsonRed font-Kodchasan text-sm hover:font-bold'><GiCupidonArrow color='#DC143C' /> My Collection</div></Link>
+                    <Link href='/myCollection'><div className='flex items-center cursor-pointer text-crimsonRed font-Kodchasan text-sm hover:font-bold'><GiCupidonArrow color='#DC143C' /> My Collection</div></Link>
                     <Link href='/browse'><div className='flex items-center cursor-pointer text-crimsonRed font-Kodchasan text-sm hover:font-bold'><MdFindInPage color='#DC143C' /> Browse</div></Link>
                 </div>
                 <div className='basis-full flex items-center justify-end'>
@@ -59,7 +59,7 @@ export default function Navbar() {
                                         <div className='flex items-center cursor-pointer font-Kodchasan text-sm hover:font-bold'><AiFillHome color='#DC143C' /> Home</div>
                                     </li>
                                 </Link>
-                                <Link href='/'>
+                                <Link href='/myCollection'>
                                     <li onClick={() => setNav(false)} className='py-5 text-crimsonRed'>
                                         <div className='flex items-center cursor-pointer font-Kodchasan text-sm hover:font-bold'><GiCupidonArrow color='#DC143C' /> My Collection</div>
                                     </li>

@@ -7,16 +7,20 @@
     font-family: "Kodchasan";
     src: url('/assets/fonts/Kodchasan-Regular.woff') format('woff');
   }
+  @font-face {
+    font-family: "Chewy";
+    src: url('/assets/fonts/Chewy-Regular.ttf') format('truetype');
+  }
   body {
     @apply bg-lightPink;
   }
 }
 
-#hero {
+.transparent-background {
   position: relative;
 }
 
-#hero::before {
+.transparent-background::before {
   content: '';
   position: absolute;
   top: 0;
@@ -26,6 +30,6 @@
   background-color: rgba(255, 255, 255, 0.5);
 }
 
-#hero > * {
+.transparent-background > * {
   position: relative;
 }

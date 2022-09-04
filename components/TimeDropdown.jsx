@@ -11,7 +11,7 @@ export default function TimeDropdown({ options, setState }) {
     }
 
     return (
-        <div className='bg-white divide-y divide-gray-100 w-60 absolute opacity-100 rounded-lg mt-1'>
+        <div className='bg-white divide-y divide-gray-100 w-60 z-40 absolute opacity-100 rounded-lg mt-1'>
             {
                 Object.entries(options).map(([key, value]) => {
                     return (

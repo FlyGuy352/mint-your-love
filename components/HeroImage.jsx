@@ -1,6 +1,6 @@
 export default function HeroImage() {
     return (
-        <div id='hero' className='w-full h-full bg-hero bg-cover bg-center bg-opacity-55 grid grid-rows-3 gap-5 py-10'>
+        <div className='w-full h-full bg-hero bg-cover bg-center grid grid-rows-3 gap-5 py-10 transparent-background'>
             <div className='row-start-2 text-center text-crimsonRed text-4xl italic tracking-wide'>
                 <h2>Immortalize Your Love on the Blockchain</h2>
             </div>

@@ -15,7 +15,7 @@ export default function MultiselectDropdown({ optionState, title, setState }) {
     }
 
     return (
-        <div className='bg-white pt-2 divide-y divide-gray-100 w-60 absolute opacity-100 rounded-lg mt-1'>
+        <div className='bg-white pt-2 divide-y divide-gray-100 w-60 z-40 absolute opacity-100 rounded-lg mt-1'>
             <div className='px-3'>
                 <div className='flex items-center justify-between mb-2'>
                     <p className='text-xs font-medium'>{title}</p>
