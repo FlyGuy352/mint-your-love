@@ -7,13 +7,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        lightPink: '#FFF7F8',
+        lighterPink: '#FFF7F8',
         crimsonRed: '#DC143C',
         darkRed: '#8B0000',
-        pinkishPurple: '#E75480',
-        mediumPink: '#FADADD',
+        darkPink: '#E75480',
+        lightPink: '#FADADD',
         lightSkyBlue: '#CDECFF',
-        softPink: '#FFC0CB'
+        lightPink: '#FFC0CB'
       }
     },
     fontFamily: {

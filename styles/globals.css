@@ -12,7 +12,7 @@
     src: url('/assets/fonts/Chewy-Regular.ttf') format('truetype');
   }
   body {
-    @apply bg-lightPink;
+    @apply bg-lighterPink;
   }
 }
 
@@ -32,4 +32,12 @@
 
 .transparent-background > * {
   position: relative;
+}
+
+.selected-tab {
+  border-bottom: 2px solid #DC143C !important;
+}
+
+.selected-tab:focus:after {
+  background: none !important;
 }

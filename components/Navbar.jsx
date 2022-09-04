@@ -35,7 +35,7 @@ export default function Navbar() {
             {<div className={nav ? 'md:hidden fixed left-0 top-0 w-full h-screen bg-black/70 z-50' : ''}>
                 <div className={
                     nav ?
-                        'fixed left-0 top-0 w-[75%] sm:w-[60%] h-screen bg-lightPink p-10 ease-in duration-500' :
+                        'fixed left-0 top-0 w-[75%] sm:w-[60%] h-screen bg-lighterPink p-10 ease-in duration-500' :
                         'fixed left-[-100%] top-0 p-10 ease-in duration-500'
                 }>
                     <div className={nav ? 'block' : 'hidden'}>

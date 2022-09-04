@@ -9,8 +9,8 @@ export default function MyCollection() {
             <div className='mt-10'>
                 <MintBanner />
             </div>
-            <div className='mt-10'>
-                <Tabs>
+            <div className='m-10'>
+                <Tabs selectedTabClassName='text-crimsonRed font-bold selected-tab'>
                     <TabList>
                         <Tab>Story</Tab>
                         <Tab>Calendar</Tab>

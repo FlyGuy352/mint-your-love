@@ -42,22 +42,22 @@ export default function Browse() {
                 <div className='flex flex-col gap-2 bg-white'>
                     <Image src={mealImg} alt='' height='305' width='428' />
                     <div className='flex items-start h-16 gap-2 px-2'>
-                        <div className='font-bold text-xxs bg-softPink py-1 px-5 rounded-full'>Meal</div>
-                        <div className='font-bold text-xxs bg-softPink py-1 px-5 rounded-full'>Alone Time</div>
+                        <div className='font-bold text-xxs bg-lightPink py-1 px-5 rounded-full'>Meal</div>
+                        <div className='font-bold text-xxs bg-lightPink py-1 px-5 rounded-full'>Alone Time</div>
                     </div>
                 </div>
                 <div className='flex flex-col gap-2 bg-white'>
                     <Image src={mealImg} alt='' height='305' width='428' />
                     <div className='flex items-start h-16 gap-2 px-2'>
-                        <div className='font-bold text-xxs bg-softPink py-1 px-5 rounded-full'>Meal</div>
-                        <div className='font-bold text-xxs bg-softPink py-1 px-5 rounded-full'>Alone Time</div>
+                        <div className='font-bold text-xxs bg-lightPink py-1 px-5 rounded-full'>Meal</div>
+                        <div className='font-bold text-xxs bg-lightPink py-1 px-5 rounded-full'>Alone Time</div>
                     </div>
                 </div>
                 <div className='flex flex-col gap-2 bg-white'>
                     <Image src={mealImg} alt='' height='305' width='428' />
                     <div className='flex items-start h-16 gap-2 px-2'>
-                        <div className='font-bold text-xxs bg-softPink py-1 px-5 rounded-full'>Meal</div>
-                        <div className='font-bold text-xxs bg-softPink py-1 px-5 rounded-full'>Alone Time</div>
+                        <div className='font-bold text-xxs bg-lightPink py-1 px-5 rounded-full'>Meal</div>
+                        <div className='font-bold text-xxs bg-lightPink py-1 px-5 rounded-full'>Alone Time</div>
                     </div>
                 </div>
             </div>

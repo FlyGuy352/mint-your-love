@@ -39,19 +39,19 @@ export default function BrowseSearch({ optionsSelected, setOptionsSelected, time
             <div className='flex gap-10 justify-between py-2 px-3 items-center '>
                 <div className='flex gap-7'>
                     <div ref={categoryDivRef}>
-                        <button className='flex items-center bg-pinkishPurple border border-black rounded-md text-sm py-1 tracking-wide cursor-pointer focus:outline-none focus:ring-4 focus:ring-mediumPink transition ease-in-out duration-300' onClick={() => setIsFilteringCategory(!isFilteringCategory)}>
+                        <button className='flex items-center bg-darkPink border border-black rounded-md text-sm py-1 tracking-wide cursor-pointer focus:outline-none focus:ring-4 focus:ring-lightPink transition ease-in-out duration-300' onClick={() => setIsFilteringCategory(!isFilteringCategory)}>
                             <div className='px-1'><MdEvent /></div><div className='mr-10'>{dropdownTitle('Category')}</div><div className='px-2'>{isFilteringCategory ? <AiOutlineUp /> : <AiOutlineDown />}</div>
                         </button>
                         {isFilteringCategory && <MultiselectDropdown optionState={optionsSelected} title='Category' setState={setOptionsSelected} />}
                     </div>
                     <div ref={profileDivRef}>
-                        <button className='flex items-center bg-pinkishPurple border border-black rounded-md text-sm py-1 tracking-wide cursor-pointer focus:outline-none focus:ring-4 focus:ring-mediumPink transition ease-in-out duration-300' onClick={() => setIsFilteringProfile(!isFilteringProfile)}>
+                        <button className='flex items-center bg-darkPink border border-black rounded-md text-sm py-1 tracking-wide cursor-pointer focus:outline-none focus:ring-4 focus:ring-lightPink transition ease-in-out duration-300' onClick={() => setIsFilteringProfile(!isFilteringProfile)}>
                             <div className='px-1'><MdPerson /></div><div className='mr-10'>{dropdownTitle('Profile')}</div><div className='px-2'>{isFilteringProfile ? <AiOutlineUp /> : <AiOutlineDown />}</div>
                         </button>
                         {isFilteringProfile && <MultiselectDropdown optionState={optionsSelected} title='Profile' setState={setOptionsSelected} />}
                     </div>
                     <div ref={timeDivRef}>
-                        <button className='flex items-center bg-pinkishPurple border border-black rounded-md text-sm py-1 tracking-wide cursor-pointer focus:outline-none focus:ring-4 focus:ring-mediumPink transition ease-in-out duration-300' onClick={() => setIsFilteringTime(!isFilteringTime)}>
+                        <button className='flex items-center bg-darkPink border border-black rounded-md text-sm py-1 tracking-wide cursor-pointer focus:outline-none focus:ring-4 focus:ring-lightPink transition ease-in-out duration-300' onClick={() => setIsFilteringTime(!isFilteringTime)}>
                             <div className='px-1'><ImHourGlass /></div><div className='mr-10'>{Object.entries(timeSelected).find(([, value]) => value)[0]}</div><div className='px-2'>{isFilteringTime ? <AiOutlineUp /> : <AiOutlineDown />}</div>
                         </button>
                         {isFilteringTime && <TimeDropdown options={timeSelected} setState={setTimeSelected} />}
