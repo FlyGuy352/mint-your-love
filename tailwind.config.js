@@ -11,7 +11,6 @@ module.exports = {
         crimsonRed: '#DC143C',
         darkRed: '#8B0000',
         darkPink: '#E75480',
-        lightPink: '#FADADD',
         lightSkyBlue: '#CDECFF',
         lightPink: '#FFC0CB'
       }
@@ -35,7 +34,8 @@ module.exports = {
     },
     backgroundImage: {
       'hero': "url('/assets/images/love.jpg')",
-      'heartbreak': "url('/assets/images/heartbreak.jpg')"
+      'heartbreak': "url('/assets/images/heartbreak.jpg')",
+      'success': 'linear-gradient(to top left, #B0F3F1, #FFCFDF)'
     },
     screens: {
       'sm': '640px',

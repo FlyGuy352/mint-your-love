@@ -2,6 +2,7 @@ import MyCollectionUnconnected from '../components/MyCollectionUnconnected';
 import MintBanner from '../components/MintBanner';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import Calendar from '../components/Calendar';
+import Story from '../components/Story';
 import 'react-tabs/style/react-tabs.css';
 
 export default function MyCollection() {
@@ -18,7 +19,9 @@ export default function MyCollection() {
                     </TabList>
 
                     <TabPanel>
-                        Story
+                        <div className='mt-2'>
+                            <Story />
+                        </div>
                     </TabPanel>
                     <TabPanel>
                         <Calendar />

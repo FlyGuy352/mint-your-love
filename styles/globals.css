@@ -41,3 +41,8 @@
 .selected-tab:focus:after {
   background: none !important;
 }
+
+.disable-cross::-webkit-search-decoration,
+.disable-cross::-webkit-search-cancel-button,
+.disable-cross::-webkit-search-results-button,
+.disable-cross::-webkit-search-results-decoration { display: none; }

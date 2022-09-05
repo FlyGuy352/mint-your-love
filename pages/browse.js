@@ -8,7 +8,7 @@ export default function Browse() {
 
     const [optionsSelected, setOptionsSelected] = useState({
         category: { meal: { label: 'Meal', selected: true }, trip: { label: 'Trip', selected: true }, others: { label: 'Others', selected: true } },
-        profile: { straight: { label: 'Straight', selected: true }, homosexual: { label: 'Homosexual', selected: true }, others: { label: 'Others', selected: true } }
+        profile: { straight: { label: 'Straight', selected: true }, sameSex: { label: 'Same-sex', selected: true }, others: { label: 'Others', selected: true } }
     });
 
     const dropdownTitle = title => {

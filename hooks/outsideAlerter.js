@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 
-export const useOutsideAlerter = () => {
+export const useOutsideAlerter = (alertClickInside) => {
     const ref = useRef(null);
     const [visible, setVisible] = useState(false);
 
     const handleClickOutside = () => {
-        if (ref.current && !ref.current.contains(event.target)) {
+        if (!ref.current?.contains(event.target)) {
             setVisible(false);
+        } else if (alertClickInside) {
+            setVisible(true);
         }
     };
 
