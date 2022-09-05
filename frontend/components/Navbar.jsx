@@ -11,17 +11,28 @@ import Web3Modal from 'web3modal';
 export default function Navbar() {
     const [nav, setNav] = useState(false);
     const [walletConnected, setWalletConnected] = useState(false);
+    const web3ModalRef = useRef();
 
-    const web3Modal = new Web3Modal({
-        cacheProvider: true, // optional
-        providerOptions: {}
-    });
+    useEffect(() => {
+        web3ModalRef.current = new Web3Modal({
+            providerOptions: {},
+            disableInjectedProvider: false,
+        })
+    }, []);
+
+    const getProvider = async () => {
+        const provider = await web3ModalRef.current.connect();
+        const web3Provider = new providers.Web3Provider(provider);
+        const { chainId } = await web3Provider.getNetwork();
+        if (chainId !== 4) {
+
+        }
+        return web3Provider;
+    };
 
     const connectWallet = async () => {
         try {
-            await web3Modal.connect();
-            const web3Provider = new providers.Web3Provider(provider);
-            const { chainId } = await web3Provider.getNetwork();
+            await getProvider();
             setWalletConnected(true);
         } catch (err) {
             console.error(err);
