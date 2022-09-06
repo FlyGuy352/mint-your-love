@@ -1,10 +1,21 @@
+import { useEffect } from 'react';
 import MintBanner from '../components/MintBanner';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import Calendar from '../components/Calendar';
 import Story from '../components/Story';
 import 'react-tabs/style/react-tabs.css';
+import { useMoralis } from 'react-moralis';
+import listTokensOfOwner from '../utils/listTokensOfOwner';
 
 export default function MyCollectionConnected() {
+    const { account, web3, chainId } = useMoralis();
+    const chainString = chainId ? parseInt(chainId).toString() : '31337';
+
+    useEffect(() => {
+        (async () => {
+            await listTokensOfOwner(chainString, web3, account);
+        })();
+    }, []);
 
     return (
         <div>

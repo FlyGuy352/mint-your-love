@@ -1,13 +1,16 @@
 import { ethers } from 'ethers';
+import loveTokenAbi from '../constants/LoveToken.json';
+import networkMapping from '../constants/networkMapping.json';
 
-export default function listTokensOfOwner(signer, ownerAddress) {
-    const token = new ethers.Contract(/*contractAddress, abi, signer*/);
+export default async function listTokensOfOwner(chainId, provider, ownerAddress) {
+    const loveTokenAddress = networkMapping[chainId].loveToken.at(-1);
+    const token = new ethers.Contract(loveTokenAddress, loveTokenAbi, provider);
 
     const sentLogs = await token.queryFilter(
-        token.filters.Transfer(ownerAddress, null),
+        token.filters.CustomTransfer(ownerAddress, null),
     );
     const receivedLogs = await token.queryFilter(
-        token.filters.Transfer(null, ownerAddress),
+        token.filters.CustomTransfer(null, ownerAddress),
     );
 
     const logs = sentLogs.concat(receivedLogs)
@@ -19,7 +22,7 @@ export default function listTokensOfOwner(signer, ownerAddress) {
 
     const owned = new Set();
     logs.forEach(log => {
-        const { from, to, tokenId } = log.args;
+        const { from, to, tokenId, collectionId } = log.args;
         if (to === ownerAddress) {
             owned.add(tokenId.toString());
         } else if (from === ownerAddress) {

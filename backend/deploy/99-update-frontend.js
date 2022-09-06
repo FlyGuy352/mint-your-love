@@ -1,51 +1,44 @@
-/*const { ethers, network } = require('hardhat');
+const { ethers, network } = require('hardhat');
 const fs = require('fs');
 
-const FRONT_END_CONTRACTS_FILES = ['../nextjs-nft-marketplace-fcc/constants/networkMapping.json', '../nextjs-nft-marketplace-thegraph-fcc/constants/networkMapping.json'];
-const FRONT_END_ABI_FILE_LOCATIONS = ['../nextjs-nft-marketplace-fcc/constants/', '../nextjs-nft-marketplace-thegraph-fcc/constants/'];*/
+const FRONT_END_CONTRACTS_FILE = '../frontend/constants/networkMapping.json';
+const FRONT_END_ABI_FILE_LOCATION = '../frontend/constants/';
 
 module.exports = async () => {
-    /*if (process.env.UPDATE_FRONTEND === 'true') {
-        console.log('Updating front end...');
-        const nftMarketplace = await ethers.getContract('NftMarketplace');
-        const basicNft = await ethers.getContract('BasicNft');
-        await updateContractAddresses(nftMarketplace);
-        await updateAbi(nftMarketplace, basicNft);
-    }*/
+    if (process.env.UPDATE_FRONTEND === 'true') {
+        const loveToken = await ethers.getContract('LoveToken');
+        await updateContractAddress(loveToken);
+        await updateAbi(loveToken);
+    }
 };
 
-async function updateContractAddresses(nftMarketplace) {
+async function updateContractAddress(loveToken) {
     const chainId = network.config.chainId.toString();
-    FRONT_END_CONTRACTS_FILES.forEach(file => {
-        const contractAddresses = JSON.parse(fs.readFileSync(file, 'utf8'));
-        if (chainId in contractAddresses) {
-            const chainAddresses = contractAddresses[chainId];
-            const marketplaceAddresses = chainAddresses.NftMarketplace;
-            if (Array.isArray(marketplaceAddresses)) {
-                if (marketplaceAddresses.includes(nftMarketplace.address)) {
-                    if (marketplaceAddresses.indexOf(nftMarketplace.address) !== marketplaceAddresses.length - 1) {
-                        // Make it the last item in the array
-                        marketplaceAddresses.splice(marketplaceAddresses.indexOf(nftMarketplace.address), 1);
-                        marketplaceAddresses.push(nftMarketplace.address);
-                    }
-                } else {
-                    marketplaceAddresses.push(nftMarketplace.address);
+    const contractAddresses = JSON.parse(fs.readFileSync(FRONT_END_CONTRACTS_FILE, 'utf8'));
+    if (chainId in contractAddresses) {
+        const chainAddresses = contractAddresses[chainId];
+        const loveTokenAddresses = chainAddresses.loveToken;
+        if (Array.isArray(loveTokenAddresses)) {
+            if (loveTokenAddresses.includes(loveToken.address)) {
+                if (loveTokenAddresses.indexOf(loveToken.address) !== loveTokenAddresses.length - 1) {
+                    // Make it the last item in the array
+                    loveTokenAddresses.splice(loveTokenAddresses.indexOf(loveToken.address), 1);
+                    loveTokenAddresses.push(loveToken.address);
                 }
             } else {
-                chainAddresses.NftMarketplace = [nftMarketplace.address];
+                loveTokenAddresses.push(loveToken.address);
             }
         } else {
-            contractAddresses[chainId] = { NftMarketplace: [nftMarketplace.address] };
+            loveTokenAddresses.loveToken = [loveToken.address];
         }
-        fs.writeFileSync(file, JSON.stringify(contractAddresses));
-    });
+    } else {
+        contractAddresses[chainId] = { loveToken: [loveToken.address] };
+    }
+    fs.writeFileSync(FRONT_END_CONTRACTS_FILE, JSON.stringify(contractAddresses));
 }
 
-async function updateAbi(nftMarketplace, basicNft) {
-    FRONT_END_ABI_FILE_LOCATIONS.forEach(location => {
-        fs.writeFileSync(`${location}NftMarketplace.json`, nftMarketplace.interface.format(ethers.utils.FormatTypes.json));
-        fs.writeFileSync(`${location}BasicNft.json`, basicNft.interface.format(ethers.utils.FormatTypes.json));
-    });
+async function updateAbi(loveToken) {
+    fs.writeFileSync(`${FRONT_END_ABI_FILE_LOCATION}LoveToken.json`, loveToken.interface.format(ethers.utils.FormatTypes.json));
 }
 
 module.exports.tags = ['all', 'frontend'];

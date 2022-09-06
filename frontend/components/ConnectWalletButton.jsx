@@ -1,14 +1,16 @@
 import { useEffect } from 'react';
 import { ConnectButton } from '@web3uikit/web3';
 
-export default function ConnectButtonNav() {
-
+export default function ConnectWalletButton() {
 
     useEffect(() => {
         const buttonDivs = document.querySelectorAll('[data-testid="test-connect-button-wrap"]');
         buttonDivs.forEach(btnDiv => {
             const button = btnDiv.firstChild;
             const span = button.firstChild;
+            button.classList.add('hover:scale-105');
+            button.classList.add('ease-in');
+            button.classList.add('duration-300');
             button.style.background = '#CDECFF';
             span.style.color = '#202020';
 
