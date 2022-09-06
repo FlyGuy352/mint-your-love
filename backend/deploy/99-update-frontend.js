@@ -1,17 +1,17 @@
-const { ethers, network } = require('hardhat');
+/*const { ethers, network } = require('hardhat');
 const fs = require('fs');
 
 const FRONT_END_CONTRACTS_FILES = ['../nextjs-nft-marketplace-fcc/constants/networkMapping.json', '../nextjs-nft-marketplace-thegraph-fcc/constants/networkMapping.json'];
-const FRONT_END_ABI_FILE_LOCATIONS = ['../nextjs-nft-marketplace-fcc/constants/', '../nextjs-nft-marketplace-thegraph-fcc/constants/'];
+const FRONT_END_ABI_FILE_LOCATIONS = ['../nextjs-nft-marketplace-fcc/constants/', '../nextjs-nft-marketplace-thegraph-fcc/constants/'];*/
 
 module.exports = async () => {
-    if (process.env.UPDATE_FRONTEND === 'true') {
+    /*if (process.env.UPDATE_FRONTEND === 'true') {
         console.log('Updating front end...');
         const nftMarketplace = await ethers.getContract('NftMarketplace');
         const basicNft = await ethers.getContract('BasicNft');
         await updateContractAddresses(nftMarketplace);
         await updateAbi(nftMarketplace, basicNft);
-    }
+    }*/
 };
 
 async function updateContractAddresses(nftMarketplace) {
