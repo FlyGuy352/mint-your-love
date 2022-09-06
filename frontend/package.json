@@ -13,14 +13,14 @@
     "@fullcalendar/react": "^5.11.2",
     "@fullcalendar/timegrid": "^5.11.3",
     "@web3uikit/core": "^0.1.8",
-    "ethers": "^5.7.0",
+    "@web3uikit/web3": "^0.1.6",
+    "moralis-v1": "^1.11.0",
     "next": "12.2.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-icons": "^4.4.0",
     "react-moralis": "^1.4.2",
-    "react-tabs": "^5.1.0",
-    "web3modal": "^1.9.9"
+    "react-tabs": "^5.1.0"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.18.6",

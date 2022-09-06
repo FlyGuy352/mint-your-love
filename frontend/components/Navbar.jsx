@@ -1,43 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { AiFillHome, AiOutlineClose, AiOutlineMenu } from 'react-icons/ai';
 import { GiCupidonArrow } from 'react-icons/gi';
 import { MdFindInPage } from 'react-icons/md';
 import logoImg from '../public/assets/images/logo.png';
-import { ethers } from 'ethers';
-import Web3Modal from 'web3modal';
+import ConnectWalletButton from './ConnectWalletButton';
 
 export default function Navbar() {
     const [nav, setNav] = useState(false);
-    const [walletConnected, setWalletConnected] = useState(false);
-    const web3ModalRef = useRef();
-
-    useEffect(() => {
-        web3ModalRef.current = new Web3Modal({
-            providerOptions: {},
-            disableInjectedProvider: false,
-        })
-    }, []);
-
-    const getProvider = async () => {
-        const provider = await web3ModalRef.current.connect();
-        const web3Provider = new providers.Web3Provider(provider);
-        const { chainId } = await web3Provider.getNetwork();
-        if (chainId !== 4) {
-
-        }
-        return web3Provider;
-    };
-
-    const connectWallet = async () => {
-        try {
-            await getProvider();
-            setWalletConnected(true);
-        } catch (err) {
-            console.error(err);
-        }
-    };
 
     return (
         <nav className='w-full py-3 px-4 bg-white'>
@@ -56,9 +27,7 @@ export default function Navbar() {
                     <Link href='/browse'><div className='flex items-center cursor-pointer text-crimsonRed font-Kodchasan text-sm hover:font-bold'><MdFindInPage color='#DC143C' /> Browse</div></Link>
                 </div>
                 <div className='basis-full flex items-center justify-end'>
-                    <button className='px-4 py-2 bg-lightSkyBlue rounded-full hover:scale-105 ease-in duration-300 font-bold text-sm' onClick={connectWallet}>
-                        Connect Wallet
-                    </button>
+                    <div className='font-xs text-xs' id='navConnectWallet'><ConnectWalletButton /></div>
                 </div>
             </div>
 

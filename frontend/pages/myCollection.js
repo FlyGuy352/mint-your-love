@@ -1,33 +1,22 @@
+import { useEffect } from 'react';
 import MyCollectionUnconnected from '../components/MyCollectionUnconnected';
-import MintBanner from '../components/MintBanner';
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
-import Calendar from '../components/Calendar';
-import Story from '../components/Story';
+import MyCollectionConnected from '../components/MyCollectionConnected';
 import 'react-tabs/style/react-tabs.css';
+import { useMoralis } from 'react-moralis';
 
 export default function MyCollection() {
+    const { chainId: chainIdHex, isWeb3Enabled } = useMoralis();
+    const chainId = parseInt(chainIdHex);
+
+    useEffect(() => {
+        if (isWeb3Enabled) {
+            console.log('web 3 enable')
+        }
+    }, [isWeb3Enabled]);
+
     return (
         <div>
-            <div className='mt-10'>
-                <MintBanner />
-            </div>
-            <div className='m-10'>
-                <Tabs selectedTabClassName='text-crimsonRed font-bold selected-tab'>
-                    <TabList>
-                        <Tab>Story</Tab>
-                        <Tab>Calendar</Tab>
-                    </TabList>
-
-                    <TabPanel>
-                        <div className='mt-2'>
-                            <Story />
-                        </div>
-                    </TabPanel>
-                    <TabPanel>
-                        <Calendar />
-                    </TabPanel>
-                </Tabs>
-            </div>
+            {isWeb3Enabled ? <MyCollectionConnected /> : <MyCollectionUnconnected />}
         </div>
     );
 }
