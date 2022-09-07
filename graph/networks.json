@@ -1,7 +1,7 @@
 {
-  "rinkeby": {
+  "goerli": {
     "LoveToken": {
-      "address": "0x7CbCb10a941f8970aBd85D1a413d8edb4D6e3aE3"
+      "address": "0x967890c4d1E1370d615B81e803136E4AB522631C"
     }
   }
 }

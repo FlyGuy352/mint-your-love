@@ -9,9 +9,8 @@ error LoveToken__MaxLovers();
 
 contract LoveToken is ERC721, ERC721URIStorage {
 
-    event NftMinted(uint256 indexed collectionId, uint256 indexed tokenId);
+    event NftMinted(uint256 indexed collectionId, uint256 indexed tokenId, string collectionName);
     event LoverLinked(address indexed linker, address indexed linked, uint256 indexed collectionId);
-    event CustomTransfer(address indexed from, address indexed to, uint256 indexed tokenId, uint256 indexed collectionId);
 
     uint256 private _tokenId;
     uint256 private _collectionId;
@@ -58,16 +57,12 @@ contract LoveToken is ERC721, ERC721URIStorage {
         _safeMint(msg.sender, _tokenId);
         _setTokenURI(_tokenId, uri);
         tokenIdToCollectionId[_tokenId] = _collectionId;
-        emit NftMinted(_collectionId, _tokenId);
+        emit NftMinted(_collectionId, _tokenId, collectionIdToName[_collectionId]);
     }
 
     function linkLover(address lover, uint256 collectionId) public ownsCollection(msg.sender, collectionId) maxLovers(collectionId) {
         collectionIdToLovers[collectionId].push(lover);
         emit LoverLinked(msg.sender, lover, collectionId);
-    }
-
-    function _afterTokenTransfer(address from, address to, uint256 tokenId) internal override {
-        emit CustomTransfer(from, to, tokenId, tokenIdToCollectionId[tokenId]);
     }
 
     // The following functions are overrides required by Solidity.

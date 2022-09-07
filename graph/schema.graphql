@@ -1,10 +1,12 @@
 type Collection @entity {
   id: ID!
   tokenIds: [BigInt!]!
+  collectionName: String!
 }
 
 type NftMinted @entity {
   id: ID!
   tokenId: BigInt!
   collectionId: BigInt!
+  collectionName: String!
 }

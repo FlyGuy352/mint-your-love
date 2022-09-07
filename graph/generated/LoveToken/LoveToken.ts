@@ -62,6 +62,32 @@ export class ApprovalForAll__Params {
   }
 }
 
+export class LoverLinked extends ethereum.Event {
+  get params(): LoverLinked__Params {
+    return new LoverLinked__Params(this);
+  }
+}
+
+export class LoverLinked__Params {
+  _event: LoverLinked;
+
+  constructor(event: LoverLinked) {
+    this._event = event;
+  }
+
+  get linker(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get linked(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get collectionId(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
 export class NftMinted extends ethereum.Event {
   get params(): NftMinted__Params {
     return new NftMinted__Params(this);
@@ -81,6 +107,10 @@ export class NftMinted__Params {
 
   get tokenId(): BigInt {
     return this._event.parameters[1].value.toBigInt();
+  }
+
+  get collectionName(): string {
+    return this._event.parameters[2].value.toString();
   }
 }
 
@@ -113,446 +143,5 @@ export class Transfer__Params {
 export class LoveToken extends ethereum.SmartContract {
   static bind(address: Address): LoveToken {
     return new LoveToken("LoveToken", address);
-  }
-
-  balanceOf(owner: Address): BigInt {
-    let result = super.call("balanceOf", "balanceOf(address):(uint256)", [
-      ethereum.Value.fromAddress(owner)
-    ]);
-
-    return result[0].toBigInt();
-  }
-
-  try_balanceOf(owner: Address): ethereum.CallResult<BigInt> {
-    let result = super.tryCall("balanceOf", "balanceOf(address):(uint256)", [
-      ethereum.Value.fromAddress(owner)
-    ]);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBigInt());
-  }
-
-  getApproved(tokenId: BigInt): Address {
-    let result = super.call("getApproved", "getApproved(uint256):(address)", [
-      ethereum.Value.fromUnsignedBigInt(tokenId)
-    ]);
-
-    return result[0].toAddress();
-  }
-
-  try_getApproved(tokenId: BigInt): ethereum.CallResult<Address> {
-    let result = super.tryCall(
-      "getApproved",
-      "getApproved(uint256):(address)",
-      [ethereum.Value.fromUnsignedBigInt(tokenId)]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  isApprovedForAll(owner: Address, operator: Address): boolean {
-    let result = super.call(
-      "isApprovedForAll",
-      "isApprovedForAll(address,address):(bool)",
-      [ethereum.Value.fromAddress(owner), ethereum.Value.fromAddress(operator)]
-    );
-
-    return result[0].toBoolean();
-  }
-
-  try_isApprovedForAll(
-    owner: Address,
-    operator: Address
-  ): ethereum.CallResult<boolean> {
-    let result = super.tryCall(
-      "isApprovedForAll",
-      "isApprovedForAll(address,address):(bool)",
-      [ethereum.Value.fromAddress(owner), ethereum.Value.fromAddress(operator)]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBoolean());
-  }
-
-  name(): string {
-    let result = super.call("name", "name():(string)", []);
-
-    return result[0].toString();
-  }
-
-  try_name(): ethereum.CallResult<string> {
-    let result = super.tryCall("name", "name():(string)", []);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toString());
-  }
-
-  ownerOf(tokenId: BigInt): Address {
-    let result = super.call("ownerOf", "ownerOf(uint256):(address)", [
-      ethereum.Value.fromUnsignedBigInt(tokenId)
-    ]);
-
-    return result[0].toAddress();
-  }
-
-  try_ownerOf(tokenId: BigInt): ethereum.CallResult<Address> {
-    let result = super.tryCall("ownerOf", "ownerOf(uint256):(address)", [
-      ethereum.Value.fromUnsignedBigInt(tokenId)
-    ]);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  supportsInterface(interfaceId: Bytes): boolean {
-    let result = super.call(
-      "supportsInterface",
-      "supportsInterface(bytes4):(bool)",
-      [ethereum.Value.fromFixedBytes(interfaceId)]
-    );
-
-    return result[0].toBoolean();
-  }
-
-  try_supportsInterface(interfaceId: Bytes): ethereum.CallResult<boolean> {
-    let result = super.tryCall(
-      "supportsInterface",
-      "supportsInterface(bytes4):(bool)",
-      [ethereum.Value.fromFixedBytes(interfaceId)]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBoolean());
-  }
-
-  symbol(): string {
-    let result = super.call("symbol", "symbol():(string)", []);
-
-    return result[0].toString();
-  }
-
-  try_symbol(): ethereum.CallResult<string> {
-    let result = super.tryCall("symbol", "symbol():(string)", []);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toString());
-  }
-
-  tokenURI(tokenId: BigInt): string {
-    let result = super.call("tokenURI", "tokenURI(uint256):(string)", [
-      ethereum.Value.fromUnsignedBigInt(tokenId)
-    ]);
-
-    return result[0].toString();
-  }
-
-  try_tokenURI(tokenId: BigInt): ethereum.CallResult<string> {
-    let result = super.tryCall("tokenURI", "tokenURI(uint256):(string)", [
-      ethereum.Value.fromUnsignedBigInt(tokenId)
-    ]);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toString());
-  }
-}
-
-export class ApproveCall extends ethereum.Call {
-  get inputs(): ApproveCall__Inputs {
-    return new ApproveCall__Inputs(this);
-  }
-
-  get outputs(): ApproveCall__Outputs {
-    return new ApproveCall__Outputs(this);
-  }
-}
-
-export class ApproveCall__Inputs {
-  _call: ApproveCall;
-
-  constructor(call: ApproveCall) {
-    this._call = call;
-  }
-
-  get to(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-
-  get tokenId(): BigInt {
-    return this._call.inputValues[1].value.toBigInt();
-  }
-}
-
-export class ApproveCall__Outputs {
-  _call: ApproveCall;
-
-  constructor(call: ApproveCall) {
-    this._call = call;
-  }
-}
-
-export class LinkLoverCall extends ethereum.Call {
-  get inputs(): LinkLoverCall__Inputs {
-    return new LinkLoverCall__Inputs(this);
-  }
-
-  get outputs(): LinkLoverCall__Outputs {
-    return new LinkLoverCall__Outputs(this);
-  }
-}
-
-export class LinkLoverCall__Inputs {
-  _call: LinkLoverCall;
-
-  constructor(call: LinkLoverCall) {
-    this._call = call;
-  }
-
-  get lover(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-
-  get collectionId(): BigInt {
-    return this._call.inputValues[1].value.toBigInt();
-  }
-}
-
-export class LinkLoverCall__Outputs {
-  _call: LinkLoverCall;
-
-  constructor(call: LinkLoverCall) {
-    this._call = call;
-  }
-}
-
-export class MintExistingCollectionCall extends ethereum.Call {
-  get inputs(): MintExistingCollectionCall__Inputs {
-    return new MintExistingCollectionCall__Inputs(this);
-  }
-
-  get outputs(): MintExistingCollectionCall__Outputs {
-    return new MintExistingCollectionCall__Outputs(this);
-  }
-}
-
-export class MintExistingCollectionCall__Inputs {
-  _call: MintExistingCollectionCall;
-
-  constructor(call: MintExistingCollectionCall) {
-    this._call = call;
-  }
-
-  get uri(): string {
-    return this._call.inputValues[0].value.toString();
-  }
-
-  get collectionId(): BigInt {
-    return this._call.inputValues[1].value.toBigInt();
-  }
-}
-
-export class MintExistingCollectionCall__Outputs {
-  _call: MintExistingCollectionCall;
-
-  constructor(call: MintExistingCollectionCall) {
-    this._call = call;
-  }
-}
-
-export class MintNewCollectionCall extends ethereum.Call {
-  get inputs(): MintNewCollectionCall__Inputs {
-    return new MintNewCollectionCall__Inputs(this);
-  }
-
-  get outputs(): MintNewCollectionCall__Outputs {
-    return new MintNewCollectionCall__Outputs(this);
-  }
-}
-
-export class MintNewCollectionCall__Inputs {
-  _call: MintNewCollectionCall;
-
-  constructor(call: MintNewCollectionCall) {
-    this._call = call;
-  }
-
-  get uri(): string {
-    return this._call.inputValues[0].value.toString();
-  }
-}
-
-export class MintNewCollectionCall__Outputs {
-  _call: MintNewCollectionCall;
-
-  constructor(call: MintNewCollectionCall) {
-    this._call = call;
-  }
-}
-
-export class SafeTransferFromCall extends ethereum.Call {
-  get inputs(): SafeTransferFromCall__Inputs {
-    return new SafeTransferFromCall__Inputs(this);
-  }
-
-  get outputs(): SafeTransferFromCall__Outputs {
-    return new SafeTransferFromCall__Outputs(this);
-  }
-}
-
-export class SafeTransferFromCall__Inputs {
-  _call: SafeTransferFromCall;
-
-  constructor(call: SafeTransferFromCall) {
-    this._call = call;
-  }
-
-  get from(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-
-  get to(): Address {
-    return this._call.inputValues[1].value.toAddress();
-  }
-
-  get tokenId(): BigInt {
-    return this._call.inputValues[2].value.toBigInt();
-  }
-}
-
-export class SafeTransferFromCall__Outputs {
-  _call: SafeTransferFromCall;
-
-  constructor(call: SafeTransferFromCall) {
-    this._call = call;
-  }
-}
-
-export class SafeTransferFrom1Call extends ethereum.Call {
-  get inputs(): SafeTransferFrom1Call__Inputs {
-    return new SafeTransferFrom1Call__Inputs(this);
-  }
-
-  get outputs(): SafeTransferFrom1Call__Outputs {
-    return new SafeTransferFrom1Call__Outputs(this);
-  }
-}
-
-export class SafeTransferFrom1Call__Inputs {
-  _call: SafeTransferFrom1Call;
-
-  constructor(call: SafeTransferFrom1Call) {
-    this._call = call;
-  }
-
-  get from(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-
-  get to(): Address {
-    return this._call.inputValues[1].value.toAddress();
-  }
-
-  get tokenId(): BigInt {
-    return this._call.inputValues[2].value.toBigInt();
-  }
-
-  get data(): Bytes {
-    return this._call.inputValues[3].value.toBytes();
-  }
-}
-
-export class SafeTransferFrom1Call__Outputs {
-  _call: SafeTransferFrom1Call;
-
-  constructor(call: SafeTransferFrom1Call) {
-    this._call = call;
-  }
-}
-
-export class SetApprovalForAllCall extends ethereum.Call {
-  get inputs(): SetApprovalForAllCall__Inputs {
-    return new SetApprovalForAllCall__Inputs(this);
-  }
-
-  get outputs(): SetApprovalForAllCall__Outputs {
-    return new SetApprovalForAllCall__Outputs(this);
-  }
-}
-
-export class SetApprovalForAllCall__Inputs {
-  _call: SetApprovalForAllCall;
-
-  constructor(call: SetApprovalForAllCall) {
-    this._call = call;
-  }
-
-  get operator(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-
-  get approved(): boolean {
-    return this._call.inputValues[1].value.toBoolean();
-  }
-}
-
-export class SetApprovalForAllCall__Outputs {
-  _call: SetApprovalForAllCall;
-
-  constructor(call: SetApprovalForAllCall) {
-    this._call = call;
-  }
-}
-
-export class TransferFromCall extends ethereum.Call {
-  get inputs(): TransferFromCall__Inputs {
-    return new TransferFromCall__Inputs(this);
-  }
-
-  get outputs(): TransferFromCall__Outputs {
-    return new TransferFromCall__Outputs(this);
-  }
-}
-
-export class TransferFromCall__Inputs {
-  _call: TransferFromCall;
-
-  constructor(call: TransferFromCall) {
-    this._call = call;
-  }
-
-  get from(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-
-  get to(): Address {
-    return this._call.inputValues[1].value.toAddress();
-  }
-
-  get tokenId(): BigInt {
-    return this._call.inputValues[2].value.toBigInt();
-  }
-}
-
-export class TransferFromCall__Outputs {
-  _call: TransferFromCall;
-
-  constructor(call: TransferFromCall) {
-    this._call = call;
   }
 }

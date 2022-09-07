@@ -6,6 +6,8 @@ import Story from '../components/Story';
 import 'react-tabs/style/react-tabs.css';
 import { useMoralis } from 'react-moralis';
 import listTokensOfOwner from '../utils/listTokensOfOwner';
+import listLinkedCollections from '../utils/listLinkedCollections';
+import queryCollectionTokens from '../utils/queryCollectionTokens';
 
 export default function MyCollectionConnected() {
     const { account, web3, chainId } = useMoralis();
@@ -13,7 +15,10 @@ export default function MyCollectionConnected() {
 
     useEffect(() => {
         (async () => {
-            await listTokensOfOwner(chainString, web3, account);
+            const ownedTokenIds = await listTokensOfOwner(chainString, web3, account);
+            const linkedCollectionIds = await listLinkedCollections(chainString, web3, account);
+            const ownedAndLinkedCollections = await queryCollectionTokens(ownedTokenIds, linkedCollectionIds);
+            console.log('ownedAndLinkedCollections ', ownedAndLinkedCollections)
         })();
     }, []);
 

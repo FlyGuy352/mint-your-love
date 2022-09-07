@@ -4,7 +4,7 @@ async function main() {
     const { deployer } = await getNamedAccounts();
 
     const loveToken = await ethers.getContract('LoveToken', deployer);
-    const loveTokenMintTx = await loveToken.mintNewCollection('test');
+    const loveTokenMintTx = await loveToken.mintNewCollection('test', 'testName');
     await loveTokenMintTx.wait(1);
 }
 

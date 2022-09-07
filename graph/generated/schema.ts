@@ -50,6 +50,15 @@ export class Collection extends Entity {
   set tokenIds(value: Array<BigInt>) {
     this.set("tokenIds", Value.fromBigIntArray(value));
   }
+
+  get collectionName(): string {
+    let value = this.get("collectionName");
+    return value!.toString();
+  }
+
+  set collectionName(value: string) {
+    this.set("collectionName", Value.fromString(value));
+  }
 }
 
 export class NftMinted extends Entity {
@@ -99,5 +108,14 @@ export class NftMinted extends Entity {
 
   set collectionId(value: BigInt) {
     this.set("collectionId", Value.fromBigInt(value));
+  }
+
+  get collectionName(): string {
+    let value = this.get("collectionName");
+    return value!.toString();
+  }
+
+  set collectionName(value: string) {
+    this.set("collectionName", Value.fromString(value));
   }
 }
