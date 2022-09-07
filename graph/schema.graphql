@@ -1,0 +1,10 @@
+type Collection @entity {
+  id: ID!
+  tokenIds: [BigInt!]!
+}
+
+type NftMinted @entity {
+  id: ID!
+  tokenId: BigInt!
+  collectionId: BigInt!
+}
