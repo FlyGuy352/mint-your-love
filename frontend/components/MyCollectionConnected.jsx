@@ -18,7 +18,7 @@ export default function MyCollectionConnected() {
             const ownedTokenIds = await listTokensOfOwner(chainString, web3, account);
             const linkedCollectionIds = await listLinkedCollections(chainString, web3, account);
             const ownedAndLinkedCollections = await queryCollectionTokens(ownedTokenIds, linkedCollectionIds);
-            console.log('ownedAndLinkedCollections ', ownedAndLinkedCollections)
+            console.log('ownedAndLinkedCollections ', ownedAndLinkedCollections);
         })();
     }, []);
 
