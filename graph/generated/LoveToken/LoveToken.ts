@@ -62,6 +62,58 @@ export class ApprovalForAll__Params {
   }
 }
 
+export class CollectionBurned extends ethereum.Event {
+  get params(): CollectionBurned__Params {
+    return new CollectionBurned__Params(this);
+  }
+}
+
+export class CollectionBurned__Params {
+  _event: CollectionBurned;
+
+  constructor(event: CollectionBurned) {
+    this._event = event;
+  }
+
+  get collectionId(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+}
+
+export class CollectionCreated extends ethereum.Event {
+  get params(): CollectionCreated__Params {
+    return new CollectionCreated__Params(this);
+  }
+}
+
+export class CollectionCreated__Params {
+  _event: CollectionCreated;
+
+  constructor(event: CollectionCreated) {
+    this._event = event;
+  }
+
+  get collectionId(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get timestamp(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+
+  get name(): string {
+    return this._event.parameters[2].value.toString();
+  }
+
+  get profile(): i32 {
+    return this._event.parameters[3].value.toI32();
+  }
+
+  get owner(): Address {
+    return this._event.parameters[4].value.toAddress();
+  }
+}
+
 export class LoverLinked extends ethereum.Event {
   get params(): LoverLinked__Params {
     return new LoverLinked__Params(this);
@@ -101,16 +153,24 @@ export class NftMinted__Params {
     this._event = event;
   }
 
-  get collectionId(): BigInt {
+  get tokenId(): BigInt {
     return this._event.parameters[0].value.toBigInt();
   }
 
-  get tokenId(): BigInt {
+  get collectionId(): BigInt {
     return this._event.parameters[1].value.toBigInt();
   }
 
-  get collectionName(): string {
-    return this._event.parameters[2].value.toString();
+  get timestamp(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+
+  get tags(): Array<string> {
+    return this._event.parameters[3].value.toStringArray();
+  }
+
+  get uri(): string {
+    return this._event.parameters[4].value.toString();
   }
 }
 

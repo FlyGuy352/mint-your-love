@@ -1,38 +1,32 @@
-/*const pinataSDK = require('@pinata/sdk');
-const path = require('path');
-const fs = require('fs');
+const pinataSDK = require('@pinata/sdk');
 require('dotenv').config();
 
 const pinataApiKey = process.env.PINATA_API_KEY;
 const pinataApiSecret = process.env.PINATA_API_SECRET;
 const pinata = pinataSDK(pinataApiKey, pinataApiSecret);
 
-async function storeImages(imagesFilePath) {
-    const fullImagesPath = path.resolve(imagesFilePath);
-    const fileNames = fs.readdirSync(fullImagesPath);
-    const responses = [];
-    console.log('Storing Images');
-    for (const fileName of fileNames) {
-        const readableStreamForFile = fs.createReadStream(`${fullImagesPath}/${fileName}`);
+const pinNftToIpfs = async metadatas => {
+    const ipfsHashes = [];
+
+    for (const { name, description, attributes, fileStream } of metadatas) {
+        let pinFileResponse;
         try {
-            const response = await pinata.pinFileToIPFS(readableStreamForFile);
-            console.log(`Successfully pushed image ${fileName} to pinata`);
-            responses.push(response);
+            pinFileResponse = await pinata.pinFileToIPFS(fileStream);
+            console.log('Successfully pushed image to pinata');
         } catch (error) {
-            console.log(`Error pushing ${fileName} to pinata`);
+            console.log(`Error pushing image to pinata - ${error}`);
+            reject(error);
+        }
+        try {
+            const { IpfsHash } = await pinata.pinJSONToIPFS({ name, description, attributes, image: `ipfs://${pinFileResponse.IpfsHash}` });
+            ipfsHashes.push(IpfsHash);
+        } catch (error) {
+            console.log(`Error uploading JSON to Pinata - ${error}`);
+            reject(error);
         }
     }
 
-    return { responses, fileNames };
-}
+    return ipfsHashes;
+};
 
-async function storeTokenUriMetadata(metadata) {
-    try {
-        const response = await pinata.pinJSONToIPFS(metadata);
-        return response;
-    } catch (error) {
-        console.log(`Error uploading JSON ${metadata} to Pinata`);
-    }
-}
-
-module.exports = { storeImages, storeTokenUriMetadata };*/
+module.exports = { pinNftToIpfs };

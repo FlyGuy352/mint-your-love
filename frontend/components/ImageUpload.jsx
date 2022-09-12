@@ -31,19 +31,6 @@ export default function ImageUpload({ files, setFiles }) {
         if (uploadedFiles && uploadedFiles.length > 0) {
             setFiles(uploadedFiles);
             setIsUploaded(true);
-            /*
-let url = 'YOUR URL HERE'
-let formData = new FormData()
-
-formData.append('file', file)
-
-fetch(url, {
-method: 'POST',
-body: formData
-})
-.then(() => {  })
-.catch (() => {  })
-*/
         }
     };
 

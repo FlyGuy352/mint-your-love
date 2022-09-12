@@ -46,6 +46,50 @@
   {
     "type": "event",
     "anonymous": false,
+    "name": "CollectionBurned",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "collectionId",
+        "indexed": true
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "anonymous": false,
+    "name": "CollectionCreated",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "collectionId",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "timestamp",
+        "indexed": true
+      },
+      {
+        "type": "string",
+        "name": "name",
+        "indexed": false
+      },
+      {
+        "type": "uint8",
+        "name": "profile",
+        "indexed": false
+      },
+      {
+        "type": "address",
+        "name": "owner",
+        "indexed": false
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "anonymous": false,
     "name": "LoverLinked",
     "inputs": [
       {
@@ -72,17 +116,27 @@
     "inputs": [
       {
         "type": "uint256",
+        "name": "tokenId",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
         "name": "collectionId",
         "indexed": true
       },
       {
         "type": "uint256",
-        "name": "tokenId",
+        "name": "timestamp",
         "indexed": true
       },
       {
+        "type": "string[]",
+        "name": "tags",
+        "indexed": false
+      },
+      {
         "type": "string",
-        "name": "collectionName",
+        "name": "uri",
         "indexed": false
       }
     ]

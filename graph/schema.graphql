@@ -1,12 +1,23 @@
 type Collection @entity {
   id: ID!
-  tokenIds: [BigInt!]!
-  collectionName: String!
+  name: String
+  tokens: [Token!]
+  profile: Profile
+  ownerAddress: Bytes
+  linkedPartnerAddress: Bytes
+  active: Boolean
 }
 
-type NftMinted @entity {
+type Token @entity {
   id: ID!
-  tokenId: BigInt!
-  collectionId: BigInt!
-  collectionName: String!
+  timestamp: BigInt
+  tags: [String!]
+  ownerAddress: Bytes!
+  uri: String
+}
+
+enum Profile {
+  STRAIGHT
+  SAME_SEX
+  OTHERS
 }

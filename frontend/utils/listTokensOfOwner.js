@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+/*import { ethers } from 'ethers';
 import loveTokenAbi from '../constants/LoveToken.json';
 import networkMapping from '../constants/networkMapping.json';
 
@@ -31,4 +31,4 @@ export default async function listTokensOfOwner(chainId, provider, ownerAddress)
     });
 
     return [...owned];
-};
+};*/

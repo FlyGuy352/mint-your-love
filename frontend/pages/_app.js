@@ -6,6 +6,12 @@ import Head from 'next/head';
 import Navbar from '../components/Navbar';
 import { MoralisProvider } from 'react-moralis';
 import { NotificationProvider } from '@web3uikit/core';
+import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
+
+const client = new ApolloClient({
+  cache: new InMemoryCache(),
+  uri: 'https://api.studio.thegraph.com/query/34130/lovetokengorliv7/0.0.1'
+});
 
 function MyApp({ Component, pageProps }) {
   return (
@@ -16,10 +22,12 @@ function MyApp({ Component, pageProps }) {
         <link rel='icon' href='/favicon.ico' />
       </Head>
       <MoralisProvider initializeOnMount={false}>
-        <NotificationProvider>
-          <Navbar />
-          <Component {...pageProps} />
-        </NotificationProvider>
+        <ApolloProvider client={client}>
+          <NotificationProvider>
+            <Navbar />
+            <Component {...pageProps} />
+          </NotificationProvider>
+        </ApolloProvider>
       </MoralisProvider>
     </>
   );
