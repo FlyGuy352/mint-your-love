@@ -15,7 +15,7 @@ export default function BrowseSearch({ optionsSelected, setOptionsSelected, time
     const [isFiltering, setIsFiltering] = useState(false);
 
     return (
-        <div>
+        <>
             <div className='flex flex-col gap-4 items-center'>
                 <div className='relative focus-within:ring-2 focus-within:ring-darkPink transition ease-in-out duration-300 rounded-lg w-5/6'>
                     <div className='flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none'>
@@ -66,6 +66,6 @@ export default function BrowseSearch({ optionsSelected, setOptionsSelected, time
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 };

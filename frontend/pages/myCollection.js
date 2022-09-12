@@ -16,8 +16,8 @@ export default function MyCollection() {
     }, [isWeb3Enabled]);
 
     return (
-        <div>
+        <>
             {isWeb3Enabled ? <MyCollectionConnected /> : <MyCollectionUnconnected />}
-        </div>
+        </>
     );
 }

@@ -5,7 +5,7 @@ import maticIcon from '../public/assets/icons/matic.svg';
 import avaIcon from '../public/assets/icons/avax.svg';
 import sklIcon from '../public/assets/icons/skl.svg';
 
-export default function MigrateCollectionModal({ setIsOpen }) {
+export default function MigrateCollectionModal({ collectionId, setIsOpen }) {
 
     return (
         <div className='relative z-10' aria-labelledby='modal-title' role='dialog' aria-modal='true'>

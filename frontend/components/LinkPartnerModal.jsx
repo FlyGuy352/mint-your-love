@@ -4,16 +4,17 @@ import { useContext, useState } from 'react';
 import { useNotification } from '@web3uikit/core';
 import { TokenContractContext } from './MyCollectionConnected';
 
-export default function LinkPartnerModal({ setIsOpen }) {
+export default function LinkPartnerModal({ collectionId, setIsOpen }) {
 
     const { loveTokenAddress, loveTokenAbi } = useContext(TokenContractContext);
     const [partnerAddress, setPartnerAddress] = useState('');
+    const [isCommitting, setIsCommitting] = useState(false);
 
     const { runContractFunction } = useWeb3Contract({
         abi: loveTokenAbi,
         contractAddress: loveTokenAddress,
         functionName: 'linkLover',
-        params: { lover: partnerAddress, collectionId: 1 } // Dummy collection Id 
+        params: { lover: partnerAddress, collectionId }
     });
 
     const dispatch = useNotification();
@@ -23,7 +24,7 @@ export default function LinkPartnerModal({ setIsOpen }) {
             type: 'success',
             message: 'Lover linked',
             title: 'You have linked your partner to view this collection',
-            position: 'topR',
+            position: 'topR'
         });
         setIsOpen(false);
     };
@@ -32,11 +33,13 @@ export default function LinkPartnerModal({ setIsOpen }) {
             type: 'error',
             message: 'Failed to link lover',
             title: JSON.stringify(error),
-            position: 'topR',
+            position: 'topR'
         });
+        setIsCommitting(false);
     };
 
     const commit = () => {
+        setIsCommitting(true);
         runContractFunction({
             onError: handleLinkLoverError,
             onSuccess: handleLinkLoverSuccess
@@ -50,6 +53,9 @@ export default function LinkPartnerModal({ setIsOpen }) {
             <div className='fixed inset-0 z-10 overflow-y-auto'>
                 <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
                     <div className='relative transform overflow-hidden rounded-lg bg-lighterPink shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
+                        {isCommitting && <div className='w-full absolute h-full bg-white/70 z-50 flex items-center justify-center'>
+                            <div className='loader'></div>
+                        </div>}
                         <div className='p-4'>
                             <div className='flex flex-col items-stretch gap-4 tracking-wide text-gray-700'>
                                 Enter the address of your partner to link this collection

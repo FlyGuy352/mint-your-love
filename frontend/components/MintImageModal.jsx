@@ -11,16 +11,16 @@ import { useWeb3Contract } from 'react-moralis';
 import { useNotification } from '@web3uikit/core';
 import safeFetch from '../utils/fetchWrapper';
 
-export default function MintImageModal({ setIsOpen }) {
-
+export default function MintImageModal({ collections, setIsOpen }) {
     const [files, setFiles] = useState([]);
     const { visible: isChoosingCollection, setVisible: setIsChoosingCollection, ref: chooseCollectionDiv } = useOutsideAlerter();
     const { visible: isChoosingProfile, setVisible: setIsChoosingProfile, ref: chooseProfileDiv } = useOutsideAlerter();
-    const [isAddingNew, setIsAddingNew] = useState(false);
+    const [collectionId, setCollectionId] = useState(undefined);
     const [collectionName, setCollectionName] = useState('Choose a collection');
     const profileOptions = ['Straight', 'Same-sex', 'Others'];
     const [profileName, setProfileName] = useState('Relationship profile');
     const [tags, setTags] = useState([]);
+    const [isCommitting, setIsCommitting] = useState(false);
     const { loveTokenAddress, loveTokenAbi } = useContext(TokenContractContext);
 
     const dispatch = useNotification();
@@ -30,7 +30,7 @@ export default function MintImageModal({ setIsOpen }) {
             type: 'success',
             message: 'NFT minted',
             title: 'You have minted an NFT of your cherished memory',
-            position: 'topR',
+            position: 'topR'
         });
         setIsOpen(false);
     };
@@ -39,28 +39,19 @@ export default function MintImageModal({ setIsOpen }) {
             type: 'error',
             message: 'Failed to mint NFT',
             title: JSON.stringify(error),
-            position: 'topR',
+            position: 'topR'
         });
+        setIsCommitting(false);
     };
 
     const { runContractFunction } = useWeb3Contract();
 
-    /*const { runContractFunction } = useWeb3Contract({
-        abi: loveTokenAbi,
-        contractAddress: loveTokenAddress,
-        functionName: isAddingNew ? 'mintNewCollection' : 'mintExistingCollection',
-        params: {
-            uri: 'MOCK', tags,
-            ...isAddingNew ? { name: collectionName, profile: profileOptions.indexOf(profileName) } : { collectionId: '1' }
-        }
-    });*/
-
-    const handleNameClick = name => {
-        if (name === undefined) {
-            setIsAddingNew(true);
+    const handleCollectionClick = (id, name) => {
+        if (id === undefined) {
+            setCollectionId(null);
             setCollectionName('Adding New Collection');
         } else {
-            setIsAddingNew(false);
+            setCollectionId(id);
             setCollectionName(name);
         }
         setIsChoosingCollection(false);
@@ -71,51 +62,62 @@ export default function MintImageModal({ setIsOpen }) {
         setIsChoosingProfile(false);
     };
 
+    const validate = () => {
+        if (files.length === 0) {
+            return dispatch({ type: 'error', message: 'Please upload a file', title: 'Missing required fields', position: 'topR' });
+        }
+        return true;
+    };
+
     const commit = async () => {
-        const formData = new FormData();
-        formData.append('name', 'Testing');
-        formData.append('description', 'Testing');
-        tags.forEach((tag, index) => formData.append(`tag${index}`, tag));
+        if (validate() === true) {
+            setIsCommitting(true);
 
-        files.forEach((file, index) => {
-            formData.append(`file${index}`, file);
-        });
+            const formData = new FormData();
+            formData.append('name', 'Testing');
+            formData.append('description', 'Testing');
+            tags.forEach((tag, index) => formData.append(`tag${index}`, tag));
 
-        try {
-            const data = await safeFetch(fetch('/pinNftToIpfs', { method: 'post', body: formData }));
-            if (data.success) {
-                console.log('success ', data);
-                console.log('ipfsHashes ', data.ipfsHashes);
-                for (const ipfsHash of data.ipfsHashes) {
-                    await runContractFunction({
-                        params: {
-                            abi: loveTokenAbi,
-                            contractAddress: loveTokenAddress,
-                            functionName: isAddingNew ? 'mintNewCollection' : 'mintExistingCollection',
+            files.forEach((file, index) => {
+                formData.append(`file${index}`, file);
+            });
+
+            try {
+                const data = await safeFetch(fetch('/pinNftToIpfs', { method: 'post', body: formData }));
+                if (data.success) {
+                    for (const ipfsHash of data.ipfsHashes) {
+                        await runContractFunction({
                             params: {
-                                uri: `ipfs://${ipfsHash}`, tags,
-                                ...isAddingNew ? { name: collectionName, profile: profileOptions.indexOf(profileName) } : { collectionId: '1' }
-                            }
-                        },
-                        onSuccess: handleMintNftSuccess,
-                        onError: handleMintNftError
-                    });
+                                abi: loveTokenAbi,
+                                contractAddress: loveTokenAddress,
+                                functionName: collectionId === null ? 'mintNewCollection' : 'mintExistingCollection',
+                                params: {
+                                    uri: `ipfs://${ipfsHash}`, tags,
+                                    ...collectionId === null ? { name: collectionName, profile: profileOptions.indexOf(profileName) } : { collectionId }
+                                }
+                            },
+                            onSuccess: handleMintNftSuccess,
+                            onError: handleMintNftError
+                        });
+                    }
+                } else {
+                    dispatch({ type: 'error', message: JSON.stringify(data.error), title: 'Failed to pin NFT to IPFS', position: 'topR' });
+                    setIsCommitting(false);
                 }
-            } else {
-                console.log('error ', data.error);
+            } catch (error) {
+                dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch pinning endpoint', position: 'topR' });
+                setIsCommitting(false);
             }
-        } catch (error) {
-
         }
     };
 
     return (
         <div className='relative z-10' aria-labelledby='modal-title' role='dialog' aria-modal='true'>
             <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity'></div>
-
             <div className='fixed inset-0 z-10 overflow-y-auto'>
                 <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
                     <div className='min-h-[80vh] relative transform overflow-hidden rounded-lg bg-lighterPink shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
+                        {isCommitting || collections === undefined && <div className='w-full absolute min-h-[80vh] h-full bg-white/70 z-50 flex items-center justify-center'><div className='loader'></div></div>}
                         <div className='px-4 pt-5 pb-4 sm:p-6'>
                             <div className='flex flex-col gap-4'>
                                 <div>
@@ -133,13 +135,14 @@ export default function MintImageModal({ setIsOpen }) {
                                         </button>
                                         {isChoosingCollection &&
                                             <div className='text-sm bg-white absolute opacity:100 mt-1 w-full'>
-                                                <div className='flex items-center py-1 cursor-pointer hover:bg-lightPink' onClick={() => handleNameClick('test')}>
-                                                    <div className='px-1'><BiPhotoAlbum /></div><div>Test</div>
-                                                </div>
-                                                <div className='flex items-center py-1 cursor-pointer hover:bg-lightPink' onClick={() => handleNameClick('testing')}>
-                                                    <div className='px-1'><BiPhotoAlbum /></div><div>Testing</div>
-                                                </div>
-                                                <div className='flex items-center py-1 cursor-pointer hover:bg-lightPink' onClick={() => handleNameClick()}>
+                                                {collections?.map(({ id, name }) => {
+                                                    return (
+                                                        <div key={id} className='flex items-center py-1 cursor-pointer hover:bg-lightPink' onClick={() => handleCollectionClick(id, name)}>
+                                                            <div className='px-1'><BiPhotoAlbum /></div><div>{name}</div>
+                                                        </div>
+                                                    );
+                                                })}
+                                                <div className='flex items-center py-1 cursor-pointer hover:bg-lightPink' onClick={() => handleCollectionClick()}>
                                                     <div className='px-1'><AiOutlinePlus /></div><div className='font-medium'>Add New Collection</div>
                                                 </div>
                                             </div>
@@ -150,7 +153,7 @@ export default function MintImageModal({ setIsOpen }) {
                                     <MultiTagInput tags={tags} setTags={setTags} />
                                 </div>
 
-                                {isAddingNew &&
+                                {collectionId === null &&
                                     <div className='text-sm grid md:grid-cols-2 gap-2'>
                                         <input placeholder='Collection name' className='bg-white py-1 border border-blue-200 rounded-md focus:outline-none focus:ring-4 focus:ring-lightSkyBlue transition ease-in-out duration-300 px-2' />
                                         <div ref={chooseProfileDiv} className='flex flex-col gap-1 text-gray-700'>
@@ -166,7 +169,7 @@ export default function MintImageModal({ setIsOpen }) {
                                                         {profileOptions.map(option => {
                                                             return (
                                                                 <div className='flex items-center py-1 cursor-pointer hover:bg-lightPink' onClick={() => handleProfileClick(option)}>
-                                                                    <div className='px-1'><GiRelationshipBounds /></div><div>Straight</div>
+                                                                    <div className='px-1'><GiRelationshipBounds /></div><div>{option}</div>
                                                                 </div>
                                                             );
                                                         })}

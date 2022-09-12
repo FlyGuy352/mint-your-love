@@ -1,5 +1,6 @@
 type Collection @entity {
   id: ID!
+  timestamp: BigInt!
   name: String
   tokens: [Token!]
   profile: Profile

@@ -31,7 +31,7 @@ export default function Browse() {
     });
 
     return (
-        <div>
+        <>
             <div className='hidden md:block mt-10'>
                 <BrowseSearch optionsSelected={optionsSelected} setOptionsSelected={setOptionsSelected} timeSelected={timeSelected} setTimeSelected={setTimeSelected} dropdownTitle={dropdownTitle} />
             </div>
@@ -61,6 +61,6 @@ export default function Browse() {
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }

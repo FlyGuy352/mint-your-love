@@ -33,6 +33,7 @@ export function handleLoverLinked(event: LoverLinkedEvent): void {
 
 export function handleCollectionCreated(event: CollectionCreatedEvent): void {
   const collection = new Collection(event.params.collectionId.toString());
+  collection.timestamp = event.params.timestamp;
   collection.name = event.params.name;
   collection.tokens = [];
   collection.profile = ['STRAIGHT', 'SAME_SEX', 'OTHERS'][event.params.profile];

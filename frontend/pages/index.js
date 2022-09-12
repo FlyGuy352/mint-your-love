@@ -4,7 +4,7 @@ import mealImg from '../public/assets/images/meal.jpg';
 
 export default function Home() {
   return (
-    <div>
+    <>
       <HeroImage />
 
       <div className='pt-10 grid md:grid-cols-3 mx-auto w-4/5 gap-6'>
@@ -18,6 +18,6 @@ export default function Home() {
           <Image src={mealImg} alt='' height='305' width='428' />
         </div>
       </div>
-    </div>
+    </>
   );
 }

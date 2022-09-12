@@ -42,6 +42,15 @@ export class Collection extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value!.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
+  }
+
   get name(): string | null {
     let value = this.get("name");
     if (!value || value.kind == ValueKind.NULL) {

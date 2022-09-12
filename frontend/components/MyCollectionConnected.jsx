@@ -22,15 +22,18 @@ export default function MyCollectionConnected() {
             { or: [ { ownerAddress: { eq: "${account}" } }, { linkedPartnerAddress: { eq: "${account}" } } ] },
             { active: { eq: true } }
         ]
-    }) {
+    }, orderBy: timestamp, orderDirection: desc) {
         id
+        timestamp
         name
         tokens {
             id
             tags
             ownerAddress
+            uri
         }
         profile
+        ownerAddress
         linkedPartnerAddress
     }
     }
@@ -38,29 +41,26 @@ export default function MyCollectionConnected() {
     console.log('collections ', JSON.stringify(data?.collections))
 
     return (
-        <div>
-            <TokenContractContext.Provider value={{ loveTokenAddress, loveTokenAbi }}>
-                <div className='mt-10'>
-                    <MintBanner />
-                </div>
-                <div className='m-10'>
-                    <Tabs selectedTabClassName='text-crimsonRed font-bold selected-tab'>
-                        <TabList>
-                            <Tab>Story</Tab>
-                            <Tab>Calendar</Tab>
-                        </TabList>
-                        {/*loading ? <div></div> : <div></div>*/}
-                        <TabPanel>
-                            <div className='mt-2'>
-                                <Story />
-                            </div>
-                        </TabPanel>
-                        <TabPanel>
-                            <Calendar />
-                        </TabPanel>
-                    </Tabs>
-                </div>
-            </TokenContractContext.Provider>
-        </div>
+        <TokenContractContext.Provider value={{ loveTokenAddress, loveTokenAbi }}>
+            <div className='mt-10'>
+                <MintBanner collections={data?.collections} />
+            </div>
+            <div className='m-10'>
+                <Tabs selectedTabClassName='text-crimsonRed font-bold selected-tab'>
+                    <TabList>
+                        <Tab>Story</Tab>
+                        <Tab>Calendar</Tab>
+                    </TabList>
+                    <TabPanel>
+                        <div className='mt-2'>
+                            {loading ? <div className='flex justify-center mt-8'><div className='loader'></div></div> : <Story collections={data.collections} />}
+                        </div>
+                    </TabPanel>
+                    <TabPanel>
+                        <Calendar />
+                    </TabPanel>
+                </Tabs>
+            </div>
+        </TokenContractContext.Provider>
     );
 }
