@@ -1,23 +1,17 @@
-import { useEffect } from 'react';
 import MyCollectionUnconnected from '../components/MyCollectionUnconnected';
+import MyCollectionWrongChain from '../components/MyCollectionWrongChain';
 import MyCollectionConnected from '../components/MyCollectionConnected';
 import 'react-tabs/style/react-tabs.css';
 import { useMoralis } from 'react-moralis';
-import listTokensOfOwner from '../utils/listTokensOfOwner.js';
 
 export default function MyCollection() {
     const { chainId: chainIdHex, isWeb3Enabled } = useMoralis();
-    const chainId = parseInt(chainIdHex);
-
-    useEffect(() => {
-        if (isWeb3Enabled) {
-            console.log('web 3 enabled');
-        }
-    }, [isWeb3Enabled]);
+    const supportedChains = [5];
 
     return (
         <>
-            {isWeb3Enabled ? <MyCollectionConnected /> : <MyCollectionUnconnected />}
+            {isWeb3Enabled ? supportedChains.includes(parseInt(chainIdHex)) ?
+                <MyCollectionConnected /> : <MyCollectionWrongChain /> : <MyCollectionUnconnected />}
         </>
     );
 }

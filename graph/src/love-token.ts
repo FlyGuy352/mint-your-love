@@ -9,11 +9,8 @@ export function handleNftMinted(event: NftMintedEvent): void {
   token!.timestamp = event.params.timestamp;
   token!.tags = event.params.tags;
   token!.uri = event.params.uri;
+  token!.collection = event.params.collectionId.toString();
   token!.save();
-
-  const collection = Collection.load(event.params.collectionId.toString());
-  collection!.tokens = collection!.tokens!.concat([event.params.collectionId.toString()]);
-  collection!.save();
 }
 
 export function handleTransfer(event: TransferEvent): void {
@@ -35,7 +32,6 @@ export function handleCollectionCreated(event: CollectionCreatedEvent): void {
   const collection = new Collection(event.params.collectionId.toString());
   collection.timestamp = event.params.timestamp;
   collection.name = event.params.name;
-  collection.tokens = [];
   collection.profile = ['STRAIGHT', 'SAME_SEX', 'OTHERS'][event.params.profile];
   collection.ownerAddress = event.params.owner;
   collection.active = true;

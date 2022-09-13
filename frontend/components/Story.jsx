@@ -6,44 +6,28 @@ import MigrateCollectionModal from './MigrateCollectionModal';
 import BurnCollectionModal from './BurnCollectionModal';
 import MintImageModal from './MintImageModal';
 import Image from 'next/image';
-import safeFetch from '../utils/fetchWrapper';
 import { useOutsideAlerter } from '../hooks/outsideAlerter';
 
-export default function Story({ collections }) {
-    const [selectedCollection, setSelectedCollection] = useState(collections[0]);
+export default function Story({ collections, selectedCollection, setSelectedCollection, allOwnedImageTokens }) {
+
     const { visible: isFilteringCollection, setVisible: setIsFilteringCollection, ref: filterDivRef } = useOutsideAlerter();
-    const [allOwnedCollectionTokens, setAllOwnedCollectionTokens] = useState([]);
-    const [ownedCollectionTokensDisplay, setOwnedCollectionTokensDisplay] = useState([]);
+    const [ownedImageTokensDisplay, setOwnedImageTokensDisplay] = useState(allOwnedImageTokens);
     const [isMintModalOpen, setIsMintModalOpen] = useState(false);
     const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
     const [isMigrateModalOpen, setIsMigrateModalOpen] = useState(false);
     const [isBurnModalOpen, setIsBurnModalOpen] = useState(false);
     const [searchValue, setSearchValue] = useState('');
 
-    useEffect(() => {
-        const fetchTokensToDisplay = async tokens => {
-            return await Promise.all(tokens.map(async ({ tags, uri }) => {
-                const tokenUri = uri.replace('ipfs://', 'https://ipfs.io/ipfs/');
-                const { image } = await safeFetch(fetch(tokenUri));
-                const imageUri = image.replace('ipfs://', 'https://ipfs.io/ipfs/');
-                return { imageUri, tags };
-            }));
-        };
-        const ownedCollectionTokens = selectedCollection.tokens.filter(({ ownerAddress, uri }) => {
-            return (ownerAddress === selectedCollection.ownerAddress || ownerAddress === selectedCollection.linkedPartnerAddress) && uri.startsWith('ipfs://');
-        });
-        fetchTokensToDisplay(ownedCollectionTokens).then(result => {
-            setAllOwnedCollectionTokens(result);
-            setOwnedCollectionTokensDisplay(result);
-        }).catch(error => console.log(`Error fetching image from IPFS ${error}`));
-    }, [selectedCollection]);
-
     const search = () => {
-        const filteredTokens = allOwnedCollectionTokens.filter(({ tags }) => {
+        const filteredTokens = allOwnedImageTokens.filter(({ tags }) => {
             return tags.some(tag => tag.includes(searchValue));
         });
-        setOwnedCollectionTokensDisplay(filteredTokens);
+        setOwnedImageTokensDisplay(filteredTokens);
     };
+
+    useEffect(() => {
+        setOwnedImageTokensDisplay(allOwnedImageTokens);
+    }, [allOwnedImageTokens]);
 
     return (
         <>
@@ -84,7 +68,7 @@ export default function Story({ collections }) {
                                 </div>
                                 <div className='grow flex'>
                                     <div className='relative rounded-tl-lg rounded-bl-lg border border-darkPink bg-white grow focus-within:ring-2 focus-within:ring-darkPink transition ease-in-out duration-300'>
-                                        <input type='search' className='w-full focus:outline-none p-2 text-gray-900 rounded-lg disable-cross' placeholder='Keywords' onChange={event => setSearchValue(event.currentTarget.value)} />
+                                        <input type='search' className='w-full focus:outline-none p-2 text-gray-900 rounded-lg disable-cross' placeholder='Keywords' onChange={e => setSearchValue(e.currentTarget.value)} />
                                         <div className='absolute right-2.5 bottom-2.5 cursor-pointer'>
                                             <AiFillCaretDown color='#E75480' size={16} />
                                         </div>
@@ -113,9 +97,9 @@ export default function Story({ collections }) {
                             </div>
                         </div>
                         <div className='pt-10 grid md:grid-cols-3 mx-auto w-4/5 gap-6'>
-                            {ownedCollectionTokensDisplay.map(({ imageUri, tags }, index) => {
+                            {ownedImageTokensDisplay.map(({ id, imageUri, tags }) => {
                                 return (
-                                    <div key={index} className='flex flex-col gap-2 bg-white'>
+                                    <div key={id} className='flex flex-col gap-2 bg-white'>
                                         <Image src={imageUri} alt='' height='305' width='428' />
                                         <div className='flex items-start h-16 gap-2 px-2'>
                                             {tags.map(tag => <div key={tag} className='font-bold text-xxs bg-lightPink py-1 px-5 rounded-full'>{tag}</div>)}

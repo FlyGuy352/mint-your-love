@@ -84,6 +84,7 @@ contract LoveToken is ERC721, ERC721URIStorage {
         for (uint i = 0; i < tokenIds.length; i++) {
             _burn(tokenIds[i]);
         }
+        emit CollectionBurned(collectionId);
     }
 
     // The following functions are overrides required by Solidity.

@@ -2,7 +2,7 @@ type Collection @entity {
   id: ID!
   timestamp: BigInt!
   name: String
-  tokens: [Token!]
+  tokens: [Token!]! @derivedFrom(field: "collection")
   profile: Profile
   ownerAddress: Bytes
   linkedPartnerAddress: Bytes
@@ -11,6 +11,7 @@ type Collection @entity {
 
 type Token @entity {
   id: ID!
+  collection: Collection
   timestamp: BigInt
   tags: [String!]
   ownerAddress: Bytes!

@@ -3,16 +3,17 @@ import { AiOutlineDown } from 'react-icons/ai';
 import { GiRelationshipBounds } from 'react-icons/gi';
 import { BsFillSuitHeartFill } from 'react-icons/bs';
 import { useOutsideAlerter } from '../hooks/outsideAlerter';
-import ImageUpload from './ImageUpload';
-import ChooseCollectionDropdown from './ChooseCollectionDropdown';
-import MultiTagInput from './MultiTagInput';
 import { TokenContractContext } from './MyCollectionConnected';
 import { useWeb3Contract } from 'react-moralis';
 import { useNotification } from '@web3uikit/core';
 import safeFetch from '../utils/fetchWrapper';
+import ChooseCollectionDropdown from './ChooseCollectionDropdown';
 
-export default function MintImageModal({ collections, setIsOpen }) {
-    const [files, setFiles] = useState([]);
+export default function MintNewDayModal({ collections, setIsOpen }) {
+
+    const [eventDate, setEventDate] = useState(null);
+    const [title, setTitle] = useState(false);
+    const [description, setDescription] = useState(false);
     const { visible: isChoosingCollection, setVisible: setIsChoosingCollection, ref: chooseCollectionDiv } = useOutsideAlerter();
     const { visible: isChoosingProfile, setVisible: setIsChoosingProfile, ref: chooseProfileDiv } = useOutsideAlerter();
     const [collectionId, setCollectionId] = useState(undefined);
@@ -20,9 +21,24 @@ export default function MintImageModal({ collections, setIsOpen }) {
     const [newCollectionName, setNewCollectionName] = useState('');
     const profileOptions = ['Straight', 'Same-sex', 'Others'];
     const [profileName, setProfileName] = useState('Relationship profile');
-    const [tags, setTags] = useState([]);
     const [isCommitting, setIsCommitting] = useState(false);
     const { loveTokenAddress, loveTokenAbi } = useContext(TokenContractContext);
+
+    const handleCollectionClick = (id, name) => {
+        if (id === undefined) {
+            setCollectionId(null);
+            setCollectionName('Adding New Collection');
+        } else {
+            setCollectionId(id);
+            setCollectionName(name);
+        }
+        setIsChoosingCollection(false);
+    };
+
+    const handleProfileClick = profile => {
+        setProfileName(profile);
+        setIsChoosingProfile(false);
+    };
 
     const dispatch = useNotification();
     const handleMintNftSuccess = async tx => {
@@ -44,28 +60,11 @@ export default function MintImageModal({ collections, setIsOpen }) {
         });
         setIsCommitting(false);
     };
-
     const { runContractFunction } = useWeb3Contract();
 
-    const handleCollectionClick = (id, name) => {
-        if (id === undefined) {
-            setCollectionId(null);
-            setCollectionName('Adding New Collection');
-        } else {
-            setCollectionId(id);
-            setCollectionName(name);
-        }
-        setIsChoosingCollection(false);
-    };
-
-    const handleProfileClick = profile => {
-        setProfileName(profile);
-        setIsChoosingProfile(false);
-    };
-
     const validate = () => {
-        if (files.length === 0) {
-            return dispatch({ type: 'error', message: 'Please upload a file', title: 'Missing required fields', position: 'topR' });
+        if (eventDate === null) {
+            return dispatch({ type: 'error', message: 'Please indicate a date', title: 'Missing required fields', position: 'topR' });
         }
         return true;
     };
@@ -75,13 +74,9 @@ export default function MintImageModal({ collections, setIsOpen }) {
             setIsCommitting(true);
 
             const formData = new FormData();
-            formData.append('name', 'Testing');
-            formData.append('description', 'Testing');
-            tags.forEach((tag, index) => formData.append(`tag${index}`, tag));
-
-            files.forEach((file, index) => {
-                formData.append(`file${index}`, file);
-            });
+            formData.append('name', title);
+            formData.append('description', description);
+            formData.append('date', eventDate);
 
             try {
                 const data = await safeFetch(fetch('/pinNftToIpfs', { method: 'post', body: formData }));
@@ -93,7 +88,7 @@ export default function MintImageModal({ collections, setIsOpen }) {
                                 contractAddress: loveTokenAddress,
                                 functionName: collectionId === null ? 'mintNewCollection' : 'mintExistingCollection',
                                 params: {
-                                    uri: `ipfs://${ipfsHash}`, tags,
+                                    uri: `ipfs://${ipfsHash}`, tags: [],
                                     ...collectionId === null ? { name: newCollectionName, profile: profileOptions.indexOf(profileName) } : { collectionId }
                                 }
                             },
@@ -118,19 +113,17 @@ export default function MintImageModal({ collections, setIsOpen }) {
             <div className='fixed inset-0 z-10 overflow-y-auto'>
                 <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
                     <div className='min-h-[80vh] relative transform overflow-hidden rounded-lg bg-lighterPink shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
-                        {(isCommitting || collections === undefined) && <div className='w-full absolute min-h-[80vh] h-full bg-white/70 z-50 flex items-center justify-center'><div className='loader'></div></div>}
-                        <div className='px-4 pt-5 pb-4 sm:p-6'>
+                        {isCommitting && <div className='min-h-[80vh] w-full absolute h-full bg-white/70 z-50 flex items-center justify-center'><div className='loader'></div></div>}
+                        <div className='px-4 pt-5 pb-4 sm:py-4 sm:px-5'>
                             <div className='flex flex-col gap-4'>
-                                <div>
-                                    <p className='font-bold text-xl text-gray-700'>Upload image</p>
-                                    <p className='text-gray-500 text-xs mb-3'>PNG and JPG files are allowed</p>
+                                <p className='font-bold text-xl text-gray-700'>Commemorate Special Day</p>
+                                <div className='flex gap-8 items-center'>
+                                    <span className='text-gray-700'>Date:</span>
+                                    <input type='date' className='grow bg-white py-1 border border-blue-200 rounded-md focus:outline-none focus:ring-4 focus:ring-lightSkyBlue transition ease-in-out duration-300 px-2' defaultValue={new Date().toISOString().split('T')[0]} onChange={e => setEventDate(e.currentTarget.value)} ></input>
                                 </div>
-                                <ImageUpload files={files} setFiles={setFiles} />
+                                <input maxLength='100' placeholder='Title' className='bg-white py-1 border border-blue-200 rounded-md focus:outline-none focus:ring-4 focus:ring-lightSkyBlue transition ease-in-out duration-300 px-2' onChange={e => setTitle(e.currentTarget.value)} />
+                                <textarea rows='5' maxLength='500' placeholder='Description' className='resize-none bg-white py-1 border border-blue-200 rounded-md focus:outline-none focus:ring-4 focus:ring-lightSkyBlue transition ease-in-out duration-300 px-2' onChange={e => setDescription(e.currentTarget.value)} />
                                 <ChooseCollectionDropdown collections={collections} collectionName={collectionName} divRef={chooseCollectionDiv} isChoosingCollection={isChoosingCollection} setIsChoosingCollection={setIsChoosingCollection} handleCollectionClick={handleCollectionClick} />
-                                <div>
-                                    <MultiTagInput tags={tags} setTags={setTags} />
-                                </div>
-
                                 {collectionId === null &&
                                     <div className='text-sm grid md:grid-cols-2 gap-2'>
                                         <input maxLength='100' placeholder='Collection name' className='bg-white py-1 border border-blue-200 rounded-md focus:outline-none focus:ring-4 focus:ring-lightSkyBlue transition ease-in-out duration-300 px-2' onChange={e => setNewCollectionName(e.currentTarget.value)} />
@@ -159,7 +152,7 @@ export default function MintImageModal({ collections, setIsOpen }) {
                                 }
                             </div>
                         </div>
-                        <div className='px-4 py-3 flex flex-col md:flex-row-reverse items-stretch justify-center sm:px-6 gap-2'>
+                        <div className='p-4 flex flex-col md:flex-row-reverse items-stretch justify-center sm:px-6 gap-2'>
                             <button className='rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-500 flex items-center justify-center gap-1' onClick={commit}>
                                 Commit <BsFillSuitHeartFill />
                             </button>
@@ -168,6 +161,6 @@ export default function MintImageModal({ collections, setIsOpen }) {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

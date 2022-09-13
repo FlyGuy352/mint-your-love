@@ -22,13 +22,13 @@ app.prepare().then(() => {
             if (err) {
                 return res.status(400).json({ error: err.message });
             }
-            const metadatas = Object.values(files).map(file => {
+            const metadatas = Object.keys(files).length > 0 ? Object.values(files).map(file => {
                 return {
                     name: fields.name, description: fields.description, attributes: {
                         tags: Object.keys(fields).filter(key => key.startsWith('tag')).map(key => fields[key])
                     }, fileStream: fs.createReadStream(file.filepath)
                 };
-            });
+            }) : [{ name: fields.name, description: fields.description, attributes: { eventDate: fields.date } }];
             try {
                 const ipfsHashes = await pinNftToIpfs(metadatas);
                 res.status(200).json({ success: true, ipfsHashes });

@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { AiFillHome, AiOutlineClose, AiOutlineMenu } from 'react-icons/ai';
 import { GiCupidonArrow } from 'react-icons/gi';
 import { MdFindInPage } from 'react-icons/md';
-import logoImg from '../public/assets/images/logo.png';
+import logoImg from '../public/assets/images/logo.svg';
+import logoWhiteBackgroundImg from '../public/assets/images/logo_white.svg';
 import ConnectWalletButton from './ConnectWalletButton';
 
 export default function Navbar() {
@@ -18,7 +19,7 @@ export default function Navbar() {
                 </div>
                 <div className='hidden md:flex basis-full'>
                     <Link href='/'>
-                        <Image src={logoImg} alt='Logo' width='40' height='40' />
+                        <Image src={logoImg} alt='Logo' width='100' height='40' />
                     </Link>
                 </div>
                 <div className='hidden md:flex items-center justify-between basis-full'>
@@ -40,9 +41,7 @@ export default function Navbar() {
                     <div className={nav ? 'block' : 'hidden'}>
                         <div>
                             <div className='flex w-full items-center justify-between'>
-                                <Link href='/'>
-                                    <Image src={logoImg} alt='Logo' width='40' height='40' />
-                                </Link>
+                                <Image src={logoWhiteBackgroundImg} alt='Logo' width='110' height='110' />
                                 <div onClick={() => setNav(false)} className='rounded-full shadow-lg shadow-gray-400 bg-white p-3 cursor-pointer'>
                                     <AiOutlineClose />
                                 </div>

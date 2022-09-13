@@ -68,21 +68,13 @@ export class Collection extends Entity {
     }
   }
 
-  get tokens(): Array<string> | null {
+  get tokens(): Array<string> {
     let value = this.get("tokens");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toStringArray();
-    }
+    return value!.toStringArray();
   }
 
-  set tokens(value: Array<string> | null) {
-    if (!value) {
-      this.unset("tokens");
-    } else {
-      this.set("tokens", Value.fromStringArray(<Array<string>>value));
-    }
+  set tokens(value: Array<string>) {
+    this.set("tokens", Value.fromStringArray(value));
   }
 
   get profile(): string | null {
@@ -175,6 +167,23 @@ export class Token extends Entity {
 
   set id(value: string) {
     this.set("id", Value.fromString(value));
+  }
+
+  get collection(): string | null {
+    let value = this.get("collection");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set collection(value: string | null) {
+    if (!value) {
+      this.unset("collection");
+    } else {
+      this.set("collection", Value.fromString(<string>value));
+    }
   }
 
   get timestamp(): BigInt | null {
