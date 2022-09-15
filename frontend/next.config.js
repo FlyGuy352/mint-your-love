@@ -10,5 +10,5 @@ const withTM = require("next-transpile-modules")([
 module.exports = withTM({
   images: {
     domains: ['ipfs.io']
-  },
+  }
 });

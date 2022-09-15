@@ -1,5 +1,4 @@
-const pinataSDK = require('@pinata/sdk');
-require('dotenv').config();
+import pinataSDK from '@pinata/sdk';
 
 const pinataApiKey = process.env.PINATA_API_KEY;
 const pinataApiSecret = process.env.PINATA_API_SECRET;

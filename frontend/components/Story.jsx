@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AiFillFunnelPlot, AiFillCaretDown, AiOutlineSearch } from 'react-icons/ai';
+import { AiFillFunnelPlot, AiOutlineClose, AiOutlineSearch } from 'react-icons/ai';
 import { HiFire } from 'react-icons/hi';
 import LinkPartnerModal from './LinkPartnerModal';
 import MigrateCollectionModal from './MigrateCollectionModal';
@@ -23,6 +23,11 @@ export default function Story({ collections, selectedCollection, setSelectedColl
             return tags.some(tag => tag.includes(searchValue));
         });
         setOwnedImageTokensDisplay(filteredTokens);
+    };
+
+    const resetSearch = () => {
+        setOwnedImageTokensDisplay(allOwnedImageTokens);
+        setSearchValue('');
     };
 
     useEffect(() => {
@@ -68,9 +73,9 @@ export default function Story({ collections, selectedCollection, setSelectedColl
                                 </div>
                                 <div className='grow flex'>
                                     <div className='relative rounded-tl-lg rounded-bl-lg border border-darkPink bg-white grow focus-within:ring-2 focus-within:ring-darkPink transition ease-in-out duration-300'>
-                                        <input type='search' className='w-full focus:outline-none p-2 text-gray-900 rounded-lg disable-cross' placeholder='Keywords' onChange={e => setSearchValue(e.currentTarget.value)} />
-                                        <div className='absolute right-2.5 bottom-2.5 cursor-pointer'>
-                                            <AiFillCaretDown color='#E75480' size={16} />
+                                        <input type='search' value={searchValue} className='w-full focus:outline-none p-2 text-gray-900 rounded-lg disable-cross' placeholder='Keywords' onChange={e => setSearchValue(e.currentTarget.value)} />
+                                        <div className='absolute right-2.5 bottom-2.5 cursor-pointer' onClick={resetSearch}>
+                                            <AiOutlineClose color='#E75480' size={16} />
                                         </div>
                                     </div>
                                     <button className='px-2 border-y border-r border-darkPink rounded-tr-lg rounded-br-lg bg-white' onClick={search}>

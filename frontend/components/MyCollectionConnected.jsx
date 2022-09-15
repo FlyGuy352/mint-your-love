@@ -46,23 +46,31 @@ export default function MyCollectionConnected() {
     }
     `);
 
-    useEffect(() => {
+    if (error) {
+        const dispatch = useNotification();
+        dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch images', position: 'topL' });
+    }
+
+    /*useEffect(() => {
         if (error) {
             const dispatch = useNotification();
             dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch images', position: 'topL' });
         }
-    }, [error]);
+    }, [error]);*/
 
     const [allOwnedImageTokens, setAllOwnedImageTokens] = useState(null);
     const [allOwnedEventTokens, setAllOwnedEventTokens] = useState(null);
     const [selectedCollection, setSelectedCollection] = useState(null);
-    useEffect(() => {
+    if (data?.collections && selectedCollection === null) {
+        setSelectedCollection(data.collections[0]);
+    }
+    /*useEffect(() => {
         if (data?.collections && selectedCollection === null) {
             setSelectedCollection(data.collections[0]);
         }
-    }, [data?.collections]);
+    }, [data?.collections]);*/
 
-    useEffect(() => {
+    /*useEffect(() => {
         if (selectedCollection) {
             const fetchTokensMetadata = async tokens => {
                 const imageTokens = [];
@@ -87,7 +95,32 @@ export default function MyCollectionConnected() {
                 setAllOwnedEventTokens(eventTokens);
             }).catch(error => console.log(`Error fetching metadata from IPFS ${error}`));
         }
-    }, [selectedCollection]);
+    }, [selectedCollection]);*/
+
+    if (selectedCollection) {
+        const fetchTokensMetadata = async tokens => {
+            const imageTokens = [];
+            const eventTokens = [];
+            await Promise.all(tokens.map(async ({ id, tags, uri }) => {
+                const tokenUri = uri.replace('ipfs://', 'https://ipfs.io/ipfs/');
+                const tokenMetadata = await safeFetch(fetch(tokenUri));
+                if (tokenMetadata.image) {
+                    const imageUri = tokenMetadata.image.replace('ipfs://', 'https://ipfs.io/ipfs/');
+                    imageTokens.push({ id, imageUri, tags });
+                } else if (tokenMetadata?.attributes?.eventDate) {
+                    eventTokens.push({ id, title: tokenMetadata.name, start: tokenMetadata.attributes.eventDate, allDay: true });
+                }
+            }));
+            return { imageTokens, eventTokens };
+        };
+        const ownedCollectionTokens = selectedCollection.tokens.filter(({ ownerAddress, uri }) => {
+            return (ownerAddress === selectedCollection.ownerAddress || ownerAddress === selectedCollection.linkedPartnerAddress) && uri.startsWith('ipfs://');
+        });
+        fetchTokensMetadata(ownedCollectionTokens).then(({ imageTokens, eventTokens }) => {
+            setAllOwnedImageTokens(imageTokens);
+            setAllOwnedEventTokens(eventTokens);
+        }).catch(error => console.log(`Error fetching metadata from IPFS ${error}`));
+    }
 
     return (
         <TokenContractContext.Provider value={{ loveTokenAddress, loveTokenAbi }}>

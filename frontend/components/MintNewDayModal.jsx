@@ -79,7 +79,7 @@ export default function MintNewDayModal({ collections, setIsOpen }) {
             formData.append('date', eventDate);
 
             try {
-                const data = await safeFetch(fetch('/pinNftToIpfs', { method: 'post', body: formData }));
+                const data = await safeFetch(fetch('/api/pinToIpfs', { method: 'post', body: formData }));
                 if (data.success) {
                     for (const ipfsHash of data.ipfsHashes) {
                         await runContractFunction({

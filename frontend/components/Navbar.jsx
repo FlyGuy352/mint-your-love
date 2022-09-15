@@ -19,7 +19,7 @@ export default function Navbar() {
                 </div>
                 <div className='hidden md:flex basis-full'>
                     <Link href='/'>
-                        <Image src={logoImg} alt='Logo' width='100' height='40' />
+                        <Image src={logoImg} alt='Logo' width='100' height='40' className='cursor-pointer' />
                     </Link>
                 </div>
                 <div className='hidden md:flex items-center justify-between basis-full'>

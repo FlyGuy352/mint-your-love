@@ -10,12 +10,17 @@ export default function MultiTagInput({ tags, setTags }) {
         setCurrentValue(e.currentTarget.value);
     }
 
-    useEffect(() => {
+    if (!visible && currentValue && !tags.includes(currentValue)) {
+        setTags([...tags, currentValue]);
+        setCurrentValue('');
+    }
+
+    /*useEffect(() => {
         if (!visible && currentValue && !tags.includes(currentValue)) {
             setTags([...tags, currentValue]);
             setCurrentValue('');
         }
-    }, [visible]);
+    }, [visible]);*/
 
     return (
         <div ref={ref} className='w-full bg-white border border-blue-200 rounded-md text-sm py-1 focus:outline-none focus:ring-2 focus:ring-lightSkyBlue transition ease-in-out duration-300'>
