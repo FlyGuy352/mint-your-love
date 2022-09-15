@@ -5,19 +5,23 @@ import '../styles/globals.css';
 import Head from 'next/head';
 import Navbar from '../components/Navbar';
 import { NotificationProvider } from '@web3uikit/core';
-import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
-import { chain, configureChains, createClient, WagmiConfig } from 'wagmi';
+//import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
+import { MoralisProvider } from 'react-moralis';
+import { allChains, configureChains, createClient, WagmiConfig } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
 import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 
-const { chains, provider } = configureChains([chain.goerli], [publicProvider()]);
+const { chains, provider } = configureChains(allChains, [publicProvider()]);
 const { connectors } = getDefaultWallets({ appName: 'Mint Your Love', chains });
 const wagmiClient = createClient({ autoConnect: true, connectors, provider });
 
-const apolloClient = new ApolloClient({
+/*const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
   uri: 'https://api.studio.thegraph.com/query/34130/lovetokengorliv7/0.0.4'
-});
+});*/
+
+const APP_ID = process.env.NEXT_PUBLIC_APP_ID;
+const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
 function MyApp({ Component, pageProps }) {
   return (
@@ -29,12 +33,14 @@ function MyApp({ Component, pageProps }) {
       </Head>
       <WagmiConfig client={wagmiClient}>
         <RainbowKitProvider chains={chains}>
-          <ApolloProvider client={apolloClient}>
+          {/*<ApolloProvider client={apolloClient}>*/}
+          <MoralisProvider appId={APP_ID} serverUrl={SERVER_URL}>
             <NotificationProvider>
               <Navbar />
               <Component {...pageProps} />
             </NotificationProvider>
-          </ApolloProvider>
+          </MoralisProvider>
+          {/*</ApolloProvider>*/}
         </RainbowKitProvider>
       </WagmiConfig>
     </>

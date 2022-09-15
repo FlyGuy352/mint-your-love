@@ -12,6 +12,10 @@ const RINKEBY_RPC_URL = process.env.RINKEBY_RPC_URL || 'https://eth-rinkeby';
 const RINKEBY_PRIVATE_KEY = process.env.RINKEBY_PRIVATE_KEY || '0xkey';
 const GOERLI_RPC_URL = process.env.GOERLI_RPC_URL || 'https://eth-goerli';
 const GOERLI_PRIVATE_KEY = process.env.GOERLI_PRIVATE_KEY || '0xkey';
+const BSC_TESTNET_RPC_URL = process.env.BSC_TESTNET_RPC_URL;
+const BSC_TESTNET_PRIVATE_KEY = process.env.BSC_TESTNET_PRIVATE_KEY || '0xkey';
+const MUMBAI_RPC_URL = process.env.MUMBAI_RPC_URL;
+const MUMBAI_PRIVATE_KEY = process.env.MUMBAI_PRIVATE_KEY || '0xkey';
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || 'key';
 const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY || 'key';
 
@@ -38,6 +42,17 @@ module.exports = {
             accounts: [GOERLI_PRIVATE_KEY],
             chainId: 5,
             blockConfirmations: 6
+        },
+        bscTestnet: {
+            url: BSC_TESTNET_RPC_URL,
+            chainId: 97,
+            gasPrice: 20000000000,
+            accounts: [BSC_TESTNET_PRIVATE_KEY]
+        },
+        mumbai: {
+            url: MUMBAI_RPC_URL,
+            chainId: 80001,
+            accounts: [MUMBAI_PRIVATE_KEY]
         }
     },
     etherscan: {

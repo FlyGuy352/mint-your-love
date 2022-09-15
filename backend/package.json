@@ -1,6 +1,5 @@
 {
   "devDependencies": {
-    "@abacus-network/app": "^0.4.2-processtest",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.2",
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
     "@nomiclabs/hardhat-etherscan": "^3.1.0",

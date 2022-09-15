@@ -1,12 +1,11 @@
 const { network } = require('hardhat');
-const { developmentChains } = require('../helper-hardhat-config');
+const { networkConfig, developmentChains } = require('../helper-hardhat-config');
 const { verify } = require('../utils/verify');
 
 module.exports = async function ({ getNamedAccounts, deployments }) {
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
-
-    const args = [];
+    const args = [networkConfig[network.config.chainId].outbox];
     const loveToken = await deploy('LoveToken', {
         from: deployer,
         args,

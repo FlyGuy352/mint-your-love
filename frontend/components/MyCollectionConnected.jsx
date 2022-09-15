@@ -8,7 +8,8 @@ import { useNetwork } from 'wagmi';
 import { useAccount } from 'wagmi';
 import networkMapping from '../constants/networkMapping.json';
 import loveTokenAbi from '../constants/LoveToken.json';
-import { useQuery, gql } from '@apollo/client';
+//import { useQuery, gql } from '@apollo/client';
+import { useMoralis, useMoralisQuery } from 'react-moralis';
 import { useNotification } from '@web3uikit/core';
 import safeFetch from '../utils/fetchWrapper';
 
@@ -18,7 +19,7 @@ export default function MyCollectionConnected() {
     const { address } = useAccount();
     const { chain } = useNetwork();
     const loveTokenAddress = networkMapping[chain.id].loveToken.at(-1);
-    const { loading, error, data } = useQuery(gql`
+    /*const { loading, error, data } = useQuery(gql`
     {
     collections(filter: {
         and: [
@@ -40,12 +41,25 @@ export default function MyCollectionConnected() {
         linkedPartnerAddress
     }
     }
-    `);
-
-    if (error) {
-        const dispatch = useNotification();
-        dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch images', position: 'topL' });
+    `);*/
+    /*const { data, isFetching, error } = useMoralisQuery('Collection', async query => {
+        return await query.filter(collection => {
+            return collection.attributes.ownerAddress === address.toLowerCase() || collection.attributes.linkedPartnerAddress === address.toLowerCase();
+        });
+    });*/
+    const { data: ownedCollections, error: ownedCollectionsError } = useMoralisQuery('Collection', query => query.equalTo('ownerAddress', address.toLowerCase()));
+    const { data: linkedCollections, error: linkedCollectionsError } = useMoralisQuery('Collection', query => query.equalTo('linkedPartnerAddress', address.toLowerCase()));
+    const dispatch = useNotification();
+    if (ownedCollectionsError) {
+        dispatch({ type: 'error', message: JSON.stringify(ownedCollectionsError), title: 'Failed to fetch images', position: 'topL' });
     }
+    if (linkedCollectionsError) {
+        dispatch({ type: 'error', message: JSON.stringify(linkedCollectionsError), title: 'Failed to fetch images', position: 'topL' });
+    }
+
+    /*if (ownedCollections.length || linkedCollections.length) {
+        const { data: linkedCollections, error: linkedCollectionsError } = useMoralisQuery('Collection', query => query.equalTo('linkedPartnerAddress', address.toLowerCase()));
+    }*/
 
     const [allOwnedImageTokens, setAllOwnedImageTokens] = useState(null);
     const [allOwnedEventTokens, setAllOwnedEventTokens] = useState(null);

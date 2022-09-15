@@ -5,11 +5,12 @@ import 'react-tabs/style/react-tabs.css';
 import { useAccount, useNetwork } from 'wagmi';
 
 export default function MyCollection() {
-    const { chain, chains } = useNetwork();
+    const supportedChains = [97, 80001];
+    const { chain } = useNetwork();
     const { isConnected } = useAccount();
     return (
         <>
-            {isConnected ? chains.map(({ id }) => id).includes(chain.id) ?
+            {isConnected ? supportedChains.includes(chain.id) ?
                 <MyCollectionConnected /> : <MyCollectionWrongChain /> : <MyCollectionUnconnected />}
         </>
     );

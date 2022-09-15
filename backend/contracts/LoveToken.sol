@@ -2,15 +2,22 @@
 pragma solidity ^0.8.15;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-//import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
-import { Router } from "@abacus-network/app/contracts/Router.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 error LoveToken__NotYourCollection();
 error LoveToken__AlreadyLinkedPartner();
 error LoveToken__SameAddresses(address first, address second);
+error LoveToken__IllegalSender(bytes32 sender);
 
-contract LoveToken is ERC721, ERC721URIStorage {
+interface IOutbox {
+    function dispatch(uint32 _destinationDomain, bytes32 _recipientAddress, bytes calldata _messageBody) external returns (uint256);
+}
+
+interface IMessageRecipient {
+    function handle(uint32 _origin, bytes32 _sender, bytes calldata _messageBody) external;
+}
+
+contract LoveToken is ERC721, Ownable, IMessageRecipient {
 
     event CollectionCreated(uint256 indexed collectionId, uint256 indexed timestamp, string name, Profile profile, address owner);
     event NftMinted(uint256 indexed tokenId, uint256 indexed collectionId, uint256 indexed timestamp, string[] tags, string uri);
@@ -19,13 +26,14 @@ contract LoveToken is ERC721, ERC721URIStorage {
 
     enum Profile { STRAIGHT, SAME_SEX, OTHERS }
 
-    uint256 private _tokenId;
-    uint256 private _collectionId;
+    address public outbox;
+    uint256 private _tokenIdCounter;
+    uint256 private _collectionIdCounter;
     mapping(uint256 => Token) public tokenIdToDetails;
     mapping(uint256 => Collection) public collectionIdToDetails;
+    mapping(uint32 => bytes32[]) public domainToWhitelistedAddresses;
 
     struct Collection {
-        uint256 id;
         uint256 timestamp;
         string name;
         Token[] tokens;
@@ -38,93 +46,115 @@ contract LoveToken is ERC721, ERC721URIStorage {
         uint256 id;
         uint256 timestamp;
         string[] tags;
+        string uri;
     }
 
-    constructor() ERC721("LoveToken", "LVE") {}
-
-    modifier isOwnerOrPartner(address minter, uint256 collectionId) {
-        Collection memory _collection = collectionIdToDetails[collectionId];
-        if(minter != _collection.owner && minter != _collection.partner) {
+    modifier isOwnerOrPartner(address _minter, uint256 _collectionId) {
+        Collection memory _collection = collectionIdToDetails[_collectionId];
+        if(_minter != _collection.owner && _minter != _collection.partner) {
             revert LoveToken__NotYourCollection();
         }
         _;
     }
 
-    modifier partnerNotYetLinked(uint256 collectionId) {
-        if (collectionIdToDetails[collectionId].partner != address(0)) {
+    modifier partnerNotYetLinked(uint256 _collectionId) {
+        if (collectionIdToDetails[_collectionId].partner != address(0)) {
             revert LoveToken__AlreadyLinkedPartner();
         }
         _;
     }
 
-    modifier differentAddresses(address first, address second) {
-         if (first == second) {
-            revert LoveToken__SameAddresses(first, second);
+    modifier differentAddresses(address _first, address _second) {
+         if (_first == _second) {
+            revert LoveToken__SameAddresses(_first, _second);
         }
         _;       
     }
 
-    /*function initialize(address xAppConnectionManager) external initializer {
-        __Router_initialize(xAppConnectionManager);
-    }*/
+    modifier onlyWhitelistedSender(uint32 _origin, bytes32 _sender) {
+        bool whitelisted = false;
+        
+        bytes32[] memory whitelistedAddresses = domainToWhitelistedAddresses[_origin];
 
-    function mintNewCollection(string memory uri, string memory name, Profile profile, string[] calldata tags) public {
-        _collectionId++;
-        collectionIdToDetails[_collectionId] = Collection(_collectionId, block.timestamp, name, null, profile, msg.sender, address(0));
-        emit CollectionCreated(_collectionId, block.timestamp, name, profile, msg.sender);
-        _mint(uri, _collectionId, tags);
+        for (uint i = 0; i < whitelistedAddresses.length; i++) {
+            if(_sender == whitelistedAddresses[i]) {
+                whitelisted = true;
+            }
+        }
+
+        if (!whitelisted) {
+            revert LoveToken__IllegalSender(_sender);
+        }
+        _;
+    }
+
+    constructor(address _outbox) ERC721("LoveToken", "LVE") {
+        outbox = _outbox;
+    }
+
+    function mintNewCollection(string memory _uri, string memory _name, Profile _profile, string[] memory _tags) public {
+        _mintNewCollection(_uri, _name, _profile, _tags, msg.sender);
     }   
 
-    function mintExistingCollection(string memory uri, uint256 collectionId, string[] calldata tags) public isOwnerOrPartner(msg.sender, collectionId) {
-        _mint(uri, collectionId, tags);
+    function mintExistingCollection(string memory _uri, uint256 _collectionId, string[] memory _tags) public isOwnerOrPartner(msg.sender, _collectionId) {
+        _mint(_uri, _collectionId, _tags, msg.sender);
     }
 
-    function _mint(string memory uri, uint256 collectionId, string[] memory tags) private {
-        _tokenId++;
-        _safeMint(msg.sender, _tokenId);
-        _setTokenURI(_tokenId, uri);
-        Token memory _token = Token(_tokenId, block.timestamp, tags);
-        tokenIdToDetails[_tokenId] = _token;
-        collectionIdToDetails[_collectionId].tokens.push(_token);
-        emit NftMinted(_tokenId, collectionId, block.timestamp, tags, uri);
+    function linkLover(address _lover, uint256 _collectionId) public isOwnerOrPartner(msg.sender, _collectionId) partnerNotYetLinked(_collectionId) differentAddresses(_lover, msg.sender) {
+        collectionIdToDetails[_collectionId].partner = _lover;
+        emit LoverLinked(msg.sender, _lover, _collectionId);
     }
 
-    function linkLover(address lover, uint256 collectionId) public isOwnerOrPartner(msg.sender, collectionId) partnerNotYetLinked(collectionId) differentAddresses(lover, msg.sender) {
-        collectionIdToDetails[collectionId].partner = lover;
-        emit LoverLinked(msg.sender, lover, collectionId);
-    }
-
-    function burnCollection(uint256 collectionId) public isOwnerOrPartner(msg.sender, collectionId) {
+    function burnCollection(uint256 _collectionId) public isOwnerOrPartner(msg.sender, _collectionId) {
         Token[] memory _tokens = collectionIdToDetails[_collectionId].tokens;
         for (uint i = 0; i < _tokens.length; i++) {
             if(_isApprovedOrOwner(msg.sender, _tokens[i].id)) {
                 _burn(_tokens[i].id);
             }
         }
-        emit CollectionBurned(collectionId);
+        emit CollectionBurned(_collectionId);
     }
 
-    function transferCollection(uint256 destination, address recipient, uint256 collectionId) public isOwnerOrPartner(msg.sender, collectionId) payable {
-        burnCollection(collectionId);
+    function transferCollection(uint32 _destination, address _recipient, uint256 _collectionId) public isOwnerOrPartner(msg.sender, _collectionId) {
+        burnCollection(_collectionId);
+        IOutbox(outbox).dispatch(_destination, addressToBytes32(_recipient), abi.encode(msg.sender, collectionIdToDetails[_collectionId]));
     }
 
-   // function _handle(uint32 /*origin*/, bytes32 /*sender*/, bytes memory message) internal override {
-       // (address recipient, uint256 collectionId, uint256[] memory tokenIds) = abi.decode(message, (address, uint256, uint256[]));
-
-//    }
-
-    // The following functions are overrides required by Solidity.
-
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
-        super._burn(tokenId);
+    function whitelistSender(uint32 _domain, address _sender) onlyOwner public {
+        domainToWhitelistedAddresses[_domain].push(addressToBytes32(_sender));
     }
 
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override(ERC721, ERC721URIStorage)
-        returns (string memory)
-    {
-        return super.tokenURI(tokenId);
+    function handle(uint32 _origin, bytes32 _sender, bytes calldata _messageBody) external override onlyWhitelistedSender(_origin, _sender)  {
+        (address recipient, Collection memory _collection) = abi.decode(_messageBody, (address, Collection));
+        for (uint i = 0; i < _collection.tokens.length; i++) {
+            Token memory _token = _collection.tokens[i];
+            if (i == 0) {
+                _mintNewCollection(_token.uri, _collection.name, _collection.profile, _token.tags, recipient);
+            } else {
+                _mint(_token.uri, _collectionIdCounter, _token.tags, recipient);
+            }
+        }
+    }
+
+    function _mintNewCollection(string memory _uri, string memory _name, Profile _profile, string[] memory _tags, address _owner) private {
+        Collection storage _collection = collectionIdToDetails[_collectionIdCounter++];
+        _collection.timestamp = block.timestamp;
+        _collection.name = _name;
+        _collection.profile = _profile;
+        _collection.owner = _owner;
+        emit CollectionCreated(_collectionIdCounter, block.timestamp, _name, _profile, _owner);
+        _mint(_uri, _collectionIdCounter, _tags, _owner);
+    }   
+
+    function _mint(string memory _uri, uint256 _collectionId, string[] memory _tags, address _owner) private {
+        _safeMint(_owner, _tokenIdCounter++);
+        Token memory _token = Token(_tokenIdCounter, block.timestamp, _tags, _uri);
+        tokenIdToDetails[_tokenIdCounter] = _token;
+        collectionIdToDetails[_collectionId].tokens.push(_token);
+        emit NftMinted(_tokenIdCounter, _collectionId, block.timestamp, _tags, _uri);
+    }
+
+    function addressToBytes32(address _addr) internal pure returns (bytes32) {
+        return bytes32(uint256(uint160(_addr)));
     }
 }
