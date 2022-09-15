@@ -2,15 +2,14 @@ import MyCollectionUnconnected from '../components/MyCollectionUnconnected';
 import MyCollectionWrongChain from '../components/MyCollectionWrongChain';
 import MyCollectionConnected from '../components/MyCollectionConnected';
 import 'react-tabs/style/react-tabs.css';
-import { useMoralis } from 'react-moralis';
+import { useAccount, useNetwork } from 'wagmi';
 
 export default function MyCollection() {
-    const { chainId: chainIdHex, isWeb3Enabled } = useMoralis();
-    const supportedChains = [5];
-
+    const { chain, chains } = useNetwork();
+    const { isConnected } = useAccount();
     return (
         <>
-            {isWeb3Enabled ? supportedChains.includes(parseInt(chainIdHex)) ?
+            {isConnected ? chains.map(({ id }) => id).includes(chain.id) ?
                 <MyCollectionConnected /> : <MyCollectionWrongChain /> : <MyCollectionUnconnected />}
         </>
     );

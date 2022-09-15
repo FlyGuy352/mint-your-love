@@ -6,7 +6,9 @@ import { GiCupidonArrow } from 'react-icons/gi';
 import { MdFindInPage } from 'react-icons/md';
 import logoImg from '../public/assets/images/logo.svg';
 import logoWhiteBackgroundImg from '../public/assets/images/logo_white.svg';
-import ConnectWalletButton from './ConnectWalletButton';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import '@rainbow-me/rainbowkit/styles.css';
+import { useAccount } from 'wagmi';
 
 export default function Navbar() {
     const [nav, setNav] = useState(false);
@@ -28,7 +30,7 @@ export default function Navbar() {
                     <Link href='/browse'><div className='flex items-center cursor-pointer text-crimsonRed font-Kodchasan text-sm hover:font-bold'><MdFindInPage color='#DC143C' /> Browse</div></Link>
                 </div>
                 <div className='basis-full flex items-center justify-end'>
-                    <div className='font-xs text-xs' id='navConnectWallet'><ConnectWalletButton /></div>
+                    <div className='font-xs text-xs'><ConnectButton /></div>
                 </div>
             </div>
 

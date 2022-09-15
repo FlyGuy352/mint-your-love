@@ -7,7 +7,7 @@ import ImageUpload from './ImageUpload';
 import ChooseCollectionDropdown from './ChooseCollectionDropdown';
 import MultiTagInput from './MultiTagInput';
 import { TokenContractContext } from './MyCollectionConnected';
-import { useWeb3Contract } from 'react-moralis';
+import { useContract, useSigner } from 'wagmi';
 import { useNotification } from '@web3uikit/core';
 import safeFetch from '../utils/fetchWrapper';
 
@@ -23,29 +23,8 @@ export default function MintImageModal({ collections, setIsOpen }) {
     const [tags, setTags] = useState([]);
     const [isCommitting, setIsCommitting] = useState(false);
     const { loveTokenAddress, loveTokenAbi } = useContext(TokenContractContext);
-
+    const loveToken = useContract({ addressOrName: loveTokenAddress, contractInterface: loveTokenAbi, signerOrProvider: useSigner().data });
     const dispatch = useNotification();
-    const handleMintNftSuccess = async tx => {
-        await tx.wait(1);
-        dispatch({
-            type: 'success',
-            message: 'NFT minted',
-            title: 'You have minted an NFT of your cherished memory',
-            position: 'topR'
-        });
-        setIsOpen(false);
-    };
-    const handleMintNftError = error => {
-        dispatch({
-            type: 'error',
-            message: 'Failed to mint NFT',
-            title: JSON.stringify(error),
-            position: 'topR'
-        });
-        setIsCommitting(false);
-    };
-
-    const { runContractFunction } = useWeb3Contract();
 
     const handleCollectionClick = (id, name) => {
         if (id === undefined) {
@@ -87,26 +66,27 @@ export default function MintImageModal({ collections, setIsOpen }) {
                 const data = await safeFetch(fetch('/api/pinToIpfs', { method: 'post', body: formData }));
                 if (data.success) {
                     for (const ipfsHash of data.ipfsHashes) {
-                        await runContractFunction({
-                            params: {
-                                abi: loveTokenAbi,
-                                contractAddress: loveTokenAddress,
-                                functionName: collectionId === null ? 'mintNewCollection' : 'mintExistingCollection',
-                                params: {
-                                    uri: `ipfs://${ipfsHash}`, tags,
-                                    ...collectionId === null ? { name: newCollectionName, profile: profileOptions.indexOf(profileName) } : { collectionId }
-                                }
-                            },
-                            onSuccess: handleMintNftSuccess,
-                            onError: handleMintNftError
-                        });
+                        try {
+                            const tx = collectionId === null ? await loveToken.mintNewCollection(`ipfs://${ipfsHash}`, newCollectionName, profileOptions.indexOf(profileName), tags) :
+                                await loveToken.mintExistingCollection(`ipfs://${ipfsHash}`, collectionId, tags);
+                            await tx.wait();
+                            dispatch({
+                                type: 'success',
+                                message: 'NFT minted',
+                                title: 'You have minted an NFT of your cherished memory',
+                                position: 'topR'
+                            });
+                            setIsOpen(false);
+                        } catch (error) {
+                            dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to mint NFT', position: 'topR' });
+                        }
                     }
                 } else {
                     dispatch({ type: 'error', message: JSON.stringify(data.error), title: 'Failed to pin NFT to IPFS', position: 'topR' });
-                    setIsCommitting(false);
                 }
             } catch (error) {
                 dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch pinning endpoint', position: 'topR' });
+            } finally {
                 setIsCommitting(false);
             }
         }

@@ -4,14 +4,14 @@ import { GiRelationshipBounds } from 'react-icons/gi';
 import { BsFillSuitHeartFill } from 'react-icons/bs';
 import { useOutsideAlerter } from '../hooks/outsideAlerter';
 import { TokenContractContext } from './MyCollectionConnected';
-import { useWeb3Contract } from 'react-moralis';
+import { useContract, useSigner } from 'wagmi';
 import { useNotification } from '@web3uikit/core';
 import safeFetch from '../utils/fetchWrapper';
 import ChooseCollectionDropdown from './ChooseCollectionDropdown';
 
 export default function MintNewDayModal({ collections, setIsOpen }) {
 
-    const [eventDate, setEventDate] = useState(null);
+    const [eventDate, setEventDate] = useState(new Date().toISOString().split('T')[0]);
     const [title, setTitle] = useState(false);
     const [description, setDescription] = useState(false);
     const { visible: isChoosingCollection, setVisible: setIsChoosingCollection, ref: chooseCollectionDiv } = useOutsideAlerter();
@@ -23,6 +23,7 @@ export default function MintNewDayModal({ collections, setIsOpen }) {
     const [profileName, setProfileName] = useState('Relationship profile');
     const [isCommitting, setIsCommitting] = useState(false);
     const { loveTokenAddress, loveTokenAbi } = useContext(TokenContractContext);
+    const loveToken = useContract({ addressOrName: loveTokenAddress, contractInterface: loveTokenAbi, signerOrProvider: useSigner().data });
 
     const handleCollectionClick = (id, name) => {
         if (id === undefined) {
@@ -41,26 +42,6 @@ export default function MintNewDayModal({ collections, setIsOpen }) {
     };
 
     const dispatch = useNotification();
-    const handleMintNftSuccess = async tx => {
-        await tx.wait(1);
-        dispatch({
-            type: 'success',
-            message: 'NFT minted',
-            title: 'You have minted an NFT of your cherished memory',
-            position: 'topR'
-        });
-        setIsOpen(false);
-    };
-    const handleMintNftError = error => {
-        dispatch({
-            type: 'error',
-            message: 'Failed to mint NFT',
-            title: JSON.stringify(error),
-            position: 'topR'
-        });
-        setIsCommitting(false);
-    };
-    const { runContractFunction } = useWeb3Contract();
 
     const validate = () => {
         if (eventDate === null) {
@@ -82,26 +63,27 @@ export default function MintNewDayModal({ collections, setIsOpen }) {
                 const data = await safeFetch(fetch('/api/pinToIpfs', { method: 'post', body: formData }));
                 if (data.success) {
                     for (const ipfsHash of data.ipfsHashes) {
-                        await runContractFunction({
-                            params: {
-                                abi: loveTokenAbi,
-                                contractAddress: loveTokenAddress,
-                                functionName: collectionId === null ? 'mintNewCollection' : 'mintExistingCollection',
-                                params: {
-                                    uri: `ipfs://${ipfsHash}`, tags: [],
-                                    ...collectionId === null ? { name: newCollectionName, profile: profileOptions.indexOf(profileName) } : { collectionId }
-                                }
-                            },
-                            onSuccess: handleMintNftSuccess,
-                            onError: handleMintNftError
-                        });
+                        try {
+                            const tx = collectionId === null ? await loveToken.mintNewCollection(`ipfs://${ipfsHash}`, newCollectionName, profileOptions.indexOf(profileName), []) :
+                                await loveToken.mintExistingCollection(`ipfs://${ipfsHash}`, collectionId, []);
+                            await tx.wait();
+                            dispatch({
+                                type: 'success',
+                                message: 'NFT minted',
+                                title: 'You have minted an NFT of your cherished memory',
+                                position: 'topR'
+                            });
+                            setIsOpen(false);
+                        } catch (error) {
+                            dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to mint NFT', position: 'topR' });
+                        }
                     }
                 } else {
                     dispatch({ type: 'error', message: JSON.stringify(data.error), title: 'Failed to pin NFT to IPFS', position: 'topR' });
-                    setIsCommitting(false);
                 }
             } catch (error) {
                 dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch pinning endpoint', position: 'topR' });
+            } finally {
                 setIsCommitting(false);
             }
         }
@@ -119,7 +101,7 @@ export default function MintNewDayModal({ collections, setIsOpen }) {
                                 <p className='font-bold text-xl text-gray-700'>Commemorate Special Day</p>
                                 <div className='flex gap-8 items-center'>
                                     <span className='text-gray-700'>Date:</span>
-                                    <input type='date' className='grow bg-white py-1 border border-blue-200 rounded-md focus:outline-none focus:ring-4 focus:ring-lightSkyBlue transition ease-in-out duration-300 px-2' defaultValue={new Date().toISOString().split('T')[0]} onChange={e => setEventDate(e.currentTarget.value)} ></input>
+                                    <input type='date' className='grow bg-white py-1 border border-blue-200 rounded-md focus:outline-none focus:ring-4 focus:ring-lightSkyBlue transition ease-in-out duration-300 px-2' value={eventDate} onChange={e => setEventDate(e.currentTarget.value)} ></input>
                                 </div>
                                 <input maxLength='100' placeholder='Title' className='bg-white py-1 border border-blue-200 rounded-md focus:outline-none focus:ring-4 focus:ring-lightSkyBlue transition ease-in-out duration-300 px-2' onChange={e => setTitle(e.currentTarget.value)} />
                                 <textarea rows='5' maxLength='500' placeholder='Description' className='resize-none bg-white py-1 border border-blue-200 rounded-md focus:outline-none focus:ring-4 focus:ring-lightSkyBlue transition ease-in-out duration-300 px-2' onChange={e => setDescription(e.currentTarget.value)} />

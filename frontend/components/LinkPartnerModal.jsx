@@ -1,34 +1,26 @@
 import { BsFillSuitHeartFill } from 'react-icons/bs';
-import { useWeb3Contract } from 'react-moralis';
 import { useContext, useState } from 'react';
 import { useNotification } from '@web3uikit/core';
 import { TokenContractContext } from './MyCollectionConnected';
+import { usePrepareContractWrite, useContractWrite } from 'wagmi';
 
 export default function LinkPartnerModal({ collectionId, setIsOpen }) {
 
     const { loveTokenAddress, loveTokenAbi } = useContext(TokenContractContext);
     const [partnerAddress, setPartnerAddress] = useState('');
+
+    const { config } = usePrepareContractWrite({
+        addressOrName: loveTokenAddress,
+        contractInterface: loveTokenAbi,
+        functionName: 'linkLover',
+        args: [partnerAddress, collectionId]
+    });
+    const { error, isError, isSuccess, write } = useContractWrite(config);
+
     const [isCommitting, setIsCommitting] = useState(false);
 
-    const { runContractFunction } = useWeb3Contract({
-        abi: loveTokenAbi,
-        contractAddress: loveTokenAddress,
-        functionName: 'linkLover',
-        params: { lover: partnerAddress, collectionId }
-    });
-
     const dispatch = useNotification();
-    const handleLinkLoverSuccess = async tx => {
-        await tx.wait(1);
-        dispatch({
-            type: 'success',
-            message: 'Lover linked',
-            title: 'You have linked your partner to view this collection',
-            position: 'topR'
-        });
-        setIsOpen(false);
-    };
-    const handleLinkLoverError = error => {
+    if (isError) {
         dispatch({
             type: 'error',
             message: 'Failed to link lover',
@@ -36,14 +28,19 @@ export default function LinkPartnerModal({ collectionId, setIsOpen }) {
             position: 'topR'
         });
         setIsCommitting(false);
-    };
+    } else if (isSuccess) {
+        dispatch({
+            type: 'success',
+            message: 'Lover linked',
+            title: 'You have linked your partner to view this collection',
+            position: 'topR'
+        });
+        setIsOpen(false);
+    }
 
     const commit = () => {
         setIsCommitting(true);
-        runContractFunction({
-            onError: handleLinkLoverError,
-            onSuccess: handleLinkLoverSuccess
-        });
+        write();
     };
 
     return (

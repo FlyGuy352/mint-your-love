@@ -1,7 +1,7 @@
 import { BsFillSuitHeartFill } from 'react-icons/bs';
 import { useContext, useState } from 'react';
 import { TokenContractContext } from './MyCollectionConnected';
-import { useWeb3Contract } from 'react-moralis';
+import { usePrepareContractWrite, useContractWrite } from 'wagmi';
 import { useNotification } from '@web3uikit/core';
 
 export default function BurnCollectionModal({ collectionId, collectionName, setIsOpen }) {
@@ -9,25 +9,16 @@ export default function BurnCollectionModal({ collectionId, collectionName, setI
     const [isCommitting, setIsCommitting] = useState(false);
     const { loveTokenAddress, loveTokenAbi } = useContext(TokenContractContext);
 
-    const { runContractFunction } = useWeb3Contract({
-        abi: loveTokenAbi,
-        contractAddress: loveTokenAddress,
+    const { config } = usePrepareContractWrite({
+        addressOrName: loveTokenAddress,
+        contractInterface: loveTokenAbi,
         functionName: 'burnCollection',
-        params: { collectionId }
+        args: [collectionId]
     });
+    const { error, isError, isSuccess, write } = useContractWrite(config);
 
     const dispatch = useNotification();
-    const handleBurnCollectionSuccess = async tx => {
-        await tx.wait(1);
-        dispatch({
-            type: 'success',
-            message: 'Collection burned',
-            title: `You have burned the ${collectionName} collection`,
-            position: 'topR'
-        });
-        setIsOpen(false);
-    };
-    const handleBurnCollectionError = error => {
+    if (isError) {
         dispatch({
             type: 'error',
             message: 'Failed to burn collection',
@@ -35,14 +26,19 @@ export default function BurnCollectionModal({ collectionId, collectionName, setI
             position: 'topR'
         });
         setIsCommitting(false);
-    };
+    } else if (isSuccess) {
+        dispatch({
+            type: 'success',
+            message: 'Collection burned',
+            title: `You have burned the ${collectionName} collection`,
+            position: 'topR'
+        });
+        setIsOpen(false);
+    }
 
     const commit = () => {
         setIsCommitting(true);
-        runContractFunction({
-            onError: handleBurnCollectionError,
-            onSuccess: handleBurnCollectionSuccess
-        });
+        write();
     };
 
     return (
