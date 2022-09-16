@@ -53,6 +53,13 @@ Moralis.Cloud.afterSave('NftMinted', async request => {
         token.set('tags', request.object.get('tags'));
         token.set('uri', request.object.get('uri'));
         token.set('collectionId', request.object.get('collectionId'));
+
+        const CollectionObject = Moralis.Object.extend('Collection');
+        const query = new Moralis.Query(CollectionObject);
+        query.equalTo('objectid', request.object.get('collectionId'));
+        const collection = await query.first();
+        token.set('profile', collection.get('profile'));
+
         await token.save();
     }
 });

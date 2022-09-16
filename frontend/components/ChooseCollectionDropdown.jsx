@@ -13,9 +13,9 @@ export default function ChooseCollectionDropdown({ collections, collectionName, 
                 </button>
                 {isChoosingCollection &&
                     <div className='text-sm bg-white absolute opacity:100 mt-1 w-full'>
-                        {collections?.map(({ id, name }) => {
+                        {collections?.map(({ objectid, name }) => {
                             return (
-                                <div key={id} className='flex items-center py-1 cursor-pointer hover:bg-lightPink' onClick={() => handleCollectionClick(id, name)}>
+                                <div key={objectid} className='flex items-center py-1 cursor-pointer hover:bg-lightPink' onClick={() => handleCollectionClick(objectid, name)}>
                                     <div className='px-1'><BiPhotoAlbum /></div><div>{name}</div>
                                 </div>
                             );

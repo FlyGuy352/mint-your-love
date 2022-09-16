@@ -5,10 +5,8 @@ import { TokenContractContext } from './MyCollectionConnected';
 import { usePrepareContractWrite, useContractWrite } from 'wagmi';
 
 export default function LinkPartnerModal({ collectionId, setIsOpen }) {
-
     const { loveTokenAddress, loveTokenAbi } = useContext(TokenContractContext);
     const [partnerAddress, setPartnerAddress] = useState('');
-
     const { config } = usePrepareContractWrite({
         addressOrName: loveTokenAddress,
         contractInterface: loveTokenAbi,
@@ -20,7 +18,7 @@ export default function LinkPartnerModal({ collectionId, setIsOpen }) {
     const [isCommitting, setIsCommitting] = useState(false);
 
     const dispatch = useNotification();
-    if (isError) {
+    if (isError && isCommitting) {
         dispatch({
             type: 'error',
             message: 'Failed to link lover',
@@ -38,7 +36,7 @@ export default function LinkPartnerModal({ collectionId, setIsOpen }) {
         setIsOpen(false);
     }
 
-    const commit = () => {
+    const commit = async () => {
         setIsCommitting(true);
         write();
     };

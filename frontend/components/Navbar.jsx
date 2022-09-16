@@ -30,7 +30,7 @@ export default function Navbar() {
                     <Link href='/browse'><div className='flex items-center cursor-pointer text-crimsonRed font-Kodchasan text-sm hover:font-bold'><MdFindInPage color='#DC143C' /> Browse</div></Link>
                 </div>
                 <div className='basis-full flex items-center justify-end'>
-                    <div className='font-xs text-xs'><ConnectButton /></div>
+                    <div className='font-xs text-xs'><ConnectButton showBalance={false} /></div>
                 </div>
             </div>
 

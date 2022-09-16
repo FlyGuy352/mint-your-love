@@ -59,10 +59,10 @@ export default function Story({ collections, selectedCollection, setSelectedColl
                                     {isFilteringCollection &&
                                         <div className='flex flex-col z-40 bg-white absolute opacity-100 border border-gray-300'>
                                             {
-                                                collections.map(({ id, name }) => {
+                                                collections.map(({ objectid, name }) => {
                                                     return (
-                                                        <div key={id} className='flex gap-1 py-2 px-1 border-y border-dashed'>
-                                                            <input type='radio' name='chain' checked={id === selectedCollection.id} className='accent-crimsonRed cursor-pointer' onClick={() => setSelectedCollection(collections.find(col => col.id === id))} />
+                                                        <div key={objectid} className='flex gap-1 py-2 px-1 border-y border-dashed'>
+                                                            <input type='radio' name='chain' checked={objectid === selectedCollection.objectid} className='accent-crimsonRed cursor-pointer' onChange={() => setSelectedCollection(collections.find(col => col.objectid === objectid))} />
                                                             <p>{name}</p>
                                                         </div>
                                                     );
@@ -84,11 +84,11 @@ export default function Story({ collections, selectedCollection, setSelectedColl
                                 </div>
                             </div>
                             <div className='flex grow justify-end'>
-                                {selectedCollection.linkedPartnerAddress === null && <button className='grow md:grow-0 p-2 border-r border-white rounded-tl-lg rounded-bl-lg bg-crimsonRed text-white font-bold' onClick={() => setIsLinkModalOpen(true)}>
+                                {selectedCollection.linkedPartnerAddress === undefined && <button className='grow md:grow-0 p-2 border-r border-white rounded-tl-lg rounded-bl-lg bg-crimsonRed text-white font-bold' onClick={() => setIsLinkModalOpen(true)}>
                                     Link Partner
                                 </button>}
                                 {
-                                    selectedCollection.linkedPartnerAddress !== null &&
+                                    selectedCollection.linkedPartnerAddress !== undefined &&
                                     <div className='inline-flex items-center mx-5 justify-center px-2 py-1 text-xs font-bold leading-none text-[#8E53BF] bg-[#F3E8FE] rounded-full'>
                                         {`Partner: ${selectedCollection.linkedPartnerAddress.slice(0, 6)}...${selectedCollection.linkedPartnerAddress.slice(-6)}`}
                                     </div>
@@ -113,9 +113,9 @@ export default function Story({ collections, selectedCollection, setSelectedColl
                                 );
                             })}
                         </div>
-                        {isLinkModalOpen && <LinkPartnerModal collectionId={selectedCollection.id} setIsOpen={setIsLinkModalOpen} />}
-                        {isMigrateModalOpen && <MigrateCollectionModal collectionId={selectedCollection.id} setIsOpen={setIsMigrateModalOpen} />}
-                        {isBurnModalOpen && <BurnCollectionModal collectionId={selectedCollection.id} collectionName={selectedCollection.name} setIsOpen={setIsBurnModalOpen} />}
+                        {isLinkModalOpen && <LinkPartnerModal collectionId={selectedCollection.objectid} setIsOpen={setIsLinkModalOpen} />}
+                        {isMigrateModalOpen && <MigrateCollectionModal collectionId={selectedCollection.objectid} setIsOpen={setIsMigrateModalOpen} />}
+                        {isBurnModalOpen && <BurnCollectionModal collectionId={selectedCollection.objectid} collectionName={selectedCollection.name} setIsOpen={setIsBurnModalOpen} />}
                     </>
             }
         </>

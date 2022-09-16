@@ -23,6 +23,7 @@ export default function MintImageModal({ collections, setIsOpen }) {
     const [tags, setTags] = useState([]);
     const [isCommitting, setIsCommitting] = useState(false);
     const { loveTokenAddress, loveTokenAbi } = useContext(TokenContractContext);
+    console.log('loveTokenAddress ', loveTokenAddress)
     const loveToken = useContract({ addressOrName: loveTokenAddress, contractInterface: loveTokenAbi, signerOrProvider: useSigner().data });
     const dispatch = useNotification();
 
@@ -67,6 +68,8 @@ export default function MintImageModal({ collections, setIsOpen }) {
                 if (data.success) {
                     for (const ipfsHash of data.ipfsHashes) {
                         try {
+                            console.log('collectionId ', collectionId)
+                            console.log('tags ', tags);
                             const tx = collectionId === null ? await loveToken.mintNewCollection(`ipfs://${ipfsHash}`, newCollectionName, profileOptions.indexOf(profileName), tags) :
                                 await loveToken.mintExistingCollection(`ipfs://${ipfsHash}`, collectionId, tags);
                             await tx.wait();
@@ -126,7 +129,7 @@ export default function MintImageModal({ collections, setIsOpen }) {
                                                     <div className='text-sm bg-white absolute opacity:100 mt-1 w-full'>
                                                         {profileOptions.map(option => {
                                                             return (
-                                                                <div className='flex items-center py-1 cursor-pointer hover:bg-lightPink' onClick={() => handleProfileClick(option)}>
+                                                                <div key={option} className='flex items-center py-1 cursor-pointer hover:bg-lightPink' onClick={() => handleProfileClick(option)}>
                                                                     <div className='px-1'><GiRelationshipBounds /></div><div>{option}</div>
                                                                 </div>
                                                             );

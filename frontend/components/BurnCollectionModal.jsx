@@ -18,7 +18,7 @@ export default function BurnCollectionModal({ collectionId, collectionName, setI
     const { error, isError, isSuccess, write } = useContractWrite(config);
 
     const dispatch = useNotification();
-    if (isError) {
+    if (isError && isCommitting) {
         dispatch({
             type: 'error',
             message: 'Failed to burn collection',

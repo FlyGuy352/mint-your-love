@@ -121,7 +121,7 @@ export default function MintNewDayModal({ collections, setIsOpen }) {
                                                     <div className='text-sm bg-white absolute opacity:100 mt-1 w-full'>
                                                         {profileOptions.map(option => {
                                                             return (
-                                                                <div className='flex items-center py-1 cursor-pointer hover:bg-lightPink' onClick={() => handleProfileClick(option)}>
+                                                                <div key={option} className='flex items-center py-1 cursor-pointer hover:bg-lightPink' onClick={() => handleProfileClick(option)}>
                                                                     <div className='px-1'><GiRelationshipBounds /></div><div>{option}</div>
                                                                 </div>
                                                             );

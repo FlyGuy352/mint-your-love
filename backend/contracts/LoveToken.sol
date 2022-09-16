@@ -90,6 +90,9 @@ contract LoveToken is ERC721, Ownable, IMessageRecipient {
 
     constructor(address _outbox) ERC721("LoveToken", "LVE") {
         outbox = _outbox;
+
+        _tokenIdCounter = 0;
+        _collectionIdCounter = 0;
     }
 
     function mintNewCollection(string memory _uri, string memory _name, Profile _profile, string[] memory _tags) public {
@@ -137,7 +140,8 @@ contract LoveToken is ERC721, Ownable, IMessageRecipient {
     }
 
     function _mintNewCollection(string memory _uri, string memory _name, Profile _profile, string[] memory _tags, address _owner) private {
-        Collection storage _collection = collectionIdToDetails[_collectionIdCounter++];
+        _collectionIdCounter = _collectionIdCounter + 1;
+        Collection storage _collection = collectionIdToDetails[_collectionIdCounter];
         _collection.timestamp = block.timestamp;
         _collection.name = _name;
         _collection.profile = _profile;
@@ -147,7 +151,8 @@ contract LoveToken is ERC721, Ownable, IMessageRecipient {
     }   
 
     function _mint(string memory _uri, uint256 _collectionId, string[] memory _tags, address _owner) private {
-        _safeMint(_owner, _tokenIdCounter++);
+        _tokenIdCounter = _tokenIdCounter + 1;
+        _safeMint(_owner, _tokenIdCounter);
         Token memory _token = Token(_tokenIdCounter, block.timestamp, _tags, _uri);
         tokenIdToDetails[_tokenIdCounter] = _token;
         collectionIdToDetails[_collectionId].tokens.push(_token);
