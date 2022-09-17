@@ -1,10 +1,10 @@
-import { useState } from 'react';
+//import { useState } from 'react';
 import { useQuery } from 'react-query';
 import { useNotification } from '@web3uikit/core';
 import safeFetch from '../utils/fetchWrapper';
 
-export const useIpfsTokens = (collectionId, tokens) => {
-    const [cacheCollectionId, setCacheCollectionId] = useState(null);
+export const useIpfsTokens = ({ collectionId, browseFilters, tokens }) => {
+    //const [cacheCollectionId, setCacheCollectionId] = useState(null);
     
     const fetchTokens = async () => {
         console.log('fetching... ', tokens)
@@ -33,22 +33,26 @@ export const useIpfsTokens = (collectionId, tokens) => {
             });
         };
 
-        setCacheCollectionId(collectionId);
+        //setCacheCollectionId(collectionId);
         const allTokenInfo = await Promise.all(tokens.map(token => fetchTokenInfo(token)));
         console.log('allTokenInfo ', allTokenInfo)
-        return allTokenInfo.reduce((acc, cur) => {
-            if (cur.imageToken) {
-                return { ...acc, imageTokens: [...acc.imageTokens, cur.imageToken] };
-            } else if (cur.eventToken) {
-                return { ...acc, eventTokens: [...acc.eventTokens, cur.eventToken] };
-            } else {
-                return acc;
-            }
-        }, { imageTokens: [], eventTokens: [] });
+        if (collectionId) {
+            return allTokenInfo.reduce((acc, cur) => {
+                if (cur.imageToken) {
+                    return { ...acc, imageTokens: [...acc.imageTokens, cur.imageToken] };
+                } else if (cur.eventToken) {
+                    return { ...acc, eventTokens: [...acc.eventTokens, cur.eventToken] };
+                } else {
+                    return acc;
+                }
+            }, { imageTokens: [], eventTokens: [] });
+        } else if (browseFilters) {
+            return allTokenInfo.filter(({ imageToken }) => imageToken).map(({ imageToken }) => imageToken);
+        }
     };
 
-    const { data, isFetching, isIdle, error } = useQuery(['tokens', 'collection', collectionId], fetchTokens, { 
-        enabled: tokens !== null && tokens !== undefined && collectionId !== cacheCollectionId
+    const { data, isFetching, error } = useQuery(['tokens', 'ipfs', collectionId || browseFilters], fetchTokens, { 
+        enabled: !!tokens
     });
     const dispatch = useNotification();
     if (error) {
@@ -56,5 +60,5 @@ export const useIpfsTokens = (collectionId, tokens) => {
         dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch tokens from IPFS', position: 'topL' });
     }
 
-    return { data, isFetching, isIdle };
+    return { data, isFetching };
 };

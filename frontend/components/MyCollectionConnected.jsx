@@ -1,4 +1,4 @@
-import { createContext, useState } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import MintBanner from '../components/MintBanner';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import Calendar from '../components/Calendar';
@@ -42,12 +42,15 @@ export default function MyCollectionConnected() {
     `);*/
 
     const { address } = useAccount();
-    const { collections } = useMoralisCollections(chain.id, address);
+    const { collections, isFetching: isFetchingMoralis } = useMoralisCollections(chain.id, address);
+    console.log('collections ', collections)
     const [selectedCollection, setSelectedCollection] = useState(null);
-    if (collections && selectedCollection === null) {
-        setSelectedCollection(collections[0]);
-    }
-    const { data, isFetching, isIdle } = useIpfsTokens(selectedCollection?.objectid, selectedCollection?.tokens);
+    useEffect(() => {
+        setSelectedCollection(collections?.[0]);
+    }, [collections]);
+
+    const { data, isFetching: isFetchingIpfs } = useIpfsTokens({ collectionId: selectedCollection?.objectid, tokens: selectedCollection?.tokens });
+
     return (
         <TokenContractContext.Provider value={{ loveTokenAddress, loveTokenAbi }}>
             <div className='mt-10'>
@@ -61,13 +64,13 @@ export default function MyCollectionConnected() {
                     </TabList>
                     <TabPanel>
                         <div className='mt-4'>
-                            {(isFetching || isIdle) ? <div className='flex justify-center mt-8'><div className='loader'></div></div> :
-                                <Story collections={collections} selectedCollection={selectedCollection} setSelectedCollection={setSelectedCollection} imageTokens={data.imageTokens} />}
+                            {(isFetchingMoralis || isFetchingIpfs || collections === undefined || selectedCollection === null) ? <div className='flex justify-center mt-8'><div className='loader'></div></div> :
+                                <Story collections={collections} selectedCollection={selectedCollection} setSelectedCollection={setSelectedCollection} imageTokens={data?.imageTokens} />}
                         </div>
                     </TabPanel>
                     <TabPanel>
-                        {(isFetching || isIdle) ? <div className='flex justify-center mt-8'><div className='loader'></div></div> :
-                            <div className='mt-6'><Calendar collections={collections} eventTokens={data.eventTokens} /></div>}
+                        {(isFetchingMoralis || isFetchingIpfs || collections === undefined || selectedCollection === null) ? <div className='flex justify-center mt-8'><div className='loader'></div></div> :
+                            <div className='mt-6'><Calendar collections={collections} eventTokens={data?.eventTokens} /></div>}
                     </TabPanel>
                 </Tabs>
             </div>

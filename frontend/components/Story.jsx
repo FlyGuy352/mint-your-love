@@ -9,7 +9,8 @@ import Image from 'next/image';
 import { useOutsideAlerter } from '../hooks/outsideAlerter';
 
 export default function Story({ collections, selectedCollection, setSelectedCollection, imageTokens }) {
-
+    console.log('collections ', collections)
+    console.log('selectedCollection ', selectedCollection)
     const { visible: isFilteringCollection, setVisible: setIsFilteringCollection, ref: filterDivRef } = useOutsideAlerter();
     const [imageTokensDisplay, setImageTokensDisplay] = useState(imageTokens);
     const [isMintModalOpen, setIsMintModalOpen] = useState(false);
@@ -37,7 +38,7 @@ export default function Story({ collections, selectedCollection, setSelectedColl
     return (
         <>
             {
-                collections.length === 0 ?
+                collections.length === 0 || !selectedCollection || imageTokensDisplay === undefined ?
                     <>
                         <div className='flex justify-center mt-6'>
                             <button className='px-6 py-4 relative rounded-2xl group overflow-hidden font-bold bg-white text-crimsonRed border border-crimsonRed' onClick={() => setIsMintModalOpen(true)}>
@@ -102,9 +103,9 @@ export default function Story({ collections, selectedCollection, setSelectedColl
                             </div>
                         </div>
                         <div className='pt-10 grid md:grid-cols-3 mx-auto w-4/5 gap-6'>
-                            {imageTokensDisplay.map(({ id, imageUri, tags }) => {
+                            {imageTokensDisplay.map(({ objectid, imageUri, tags }) => {
                                 return (
-                                    <div key={id} className='flex flex-col gap-2 bg-white'>
+                                    <div key={objectid} className='flex flex-col gap-2 bg-white'>
                                         <Image src={imageUri} alt='' height='305' width='428' />
                                         <div className='flex items-start h-16 gap-2 px-2'>
                                             {tags.map(tag => <div key={tag} className='font-bold text-xxs bg-lightPink py-1 px-5 rounded-full'>{tag}</div>)}

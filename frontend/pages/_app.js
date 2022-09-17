@@ -11,7 +11,6 @@ import { publicProvider } from 'wagmi/providers/public';
 import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { bscTestnet } from '../constants/bscTestnetChain';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { MoralisProvider } from 'react-moralis';
 
 /*const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
@@ -23,17 +22,8 @@ const { connectors } = getDefaultWallets({ appName: 'Mint Your Love', chains });
 const wagmiClient = createClient({ autoConnect: true, connectors, provider });
 const queryClient = new QueryClient();;
 
-const APP_ID_BSC = process.env.NEXT_PUBLIC_APP_ID_BSC;
-const SERVER_URL_BSC = process.env.NEXT_PUBLIC_SERVER_URL_BSC;
-
-const APP_ID_MUMBAI = process.env.NEXT_PUBLIC_APP_ID_MUMBAI;
-const SERVER_URL_MUMBAI = process.env.NEXT_PUBLIC_SERVER_URL_MUMBAI;
-
 function MyApp({ Component, pageProps }) {
-  const { chain: connectedChain } = useNetwork();
-  //console.log('connectedChain ', connectedChain);
 
-//appId={connectedChain?.id === 80001 ? APP_ID_MUMBAI : APP_ID_BSC} serverUrl={connectedChain?.id === 80001 ? SERVER_URL_MUMBAI : SERVER_URL_BSC}
   return (
     <>
       <Head>
@@ -44,14 +34,12 @@ function MyApp({ Component, pageProps }) {
       <WagmiConfig client={wagmiClient}>
         <RainbowKitProvider chains={chains}>
           {/*<ApolloProvider client={apolloClient}>*/}
-          <MoralisProvider appId={connectedChain?.id === 80001 ? APP_ID_MUMBAI : APP_ID_BSC} serverUrl={connectedChain?.id === 80001 ? SERVER_URL_MUMBAI : SERVER_URL_BSC} >
-            <QueryClientProvider client={queryClient}>
-              <NotificationProvider>
-                <Navbar />
-                <Component {...pageProps} />
-              </NotificationProvider>
-            </QueryClientProvider>
-          </MoralisProvider>
+          <QueryClientProvider client={queryClient}>
+            <NotificationProvider>
+              <Navbar />
+              <Component {...pageProps} />
+            </NotificationProvider>
+          </QueryClientProvider>
           {/*</ApolloProvider>*/}
         </RainbowKitProvider>
       </WagmiConfig>
