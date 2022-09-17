@@ -6,7 +6,7 @@ import Head from 'next/head';
 import Navbar from '../components/Navbar';
 import { NotificationProvider } from '@web3uikit/core';
 //import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
-import { chain, configureChains, createClient, WagmiConfig, useNetwork } from 'wagmi';
+import { chain, configureChains, createClient, WagmiConfig } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
 import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { bscTestnet } from '../constants/bscTestnetChain';

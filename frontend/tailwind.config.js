@@ -33,7 +33,7 @@ module.exports = {
       '6xl': '4rem',
     },
     backgroundImage: {
-      'hero': "url('/assets/images/love.jpg')",
+      'hero': "url('/assets/images/wedding.jpg')",
       'heartbreak': "url('/assets/images/heartbreak.jpg')",
       'heartbreak_2': "url('/assets/images/heartbreak_2.jpg')",
       'success': 'linear-gradient(to top left, #B0F3F1, #FFCFDF)'

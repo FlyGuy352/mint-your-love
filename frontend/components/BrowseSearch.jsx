@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { AiOutlineDown, AiOutlineUp, AiOutlineSearch } from 'react-icons/ai';
 import { MdEvent, MdPerson } from 'react-icons/md';
 import { ImHourGlass } from 'react-icons/im';
@@ -9,6 +10,13 @@ export default function BrowseSearch({ optionsSelected, setOptionsSelected, time
     const { visible: isFilteringCategory, setVisible: setIsFilteringCategory, ref: categoryDivRef } = useOutsideAlerter();
     const { visible: isFilteringProfile, setVisible: setIsFilteringProfile, ref: profileDivRef } = useOutsideAlerter();
     const { visible: isFilteringTime, setVisible: setIsFilteringTime, ref: timeDivRef } = useOutsideAlerter();
+
+    const [searchTermLocal, setSearchTermLocal] = useState(searchTerm);
+
+    const clear = () => {
+        setSearchTermLocal('');
+        setSearchTerm('');
+    };
 
     const resetAll = () => {
         const cloneOptions = { ...optionsSelected };
@@ -32,9 +40,9 @@ export default function BrowseSearch({ optionsSelected, setOptionsSelected, time
                 <div className='flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none'>
                     <AiOutlineSearch color='gray' />
                 </div>
-                <input type='search' className='focus:outline-none p-4 pl-10 w-full text-sm text-gray-900 rounded-t-lg' placeholder='Keywords' required='' value={searchTerm} onChange={e => setSearchTerm(e.currentTarget.value)}/>
-                <button className='absolute right-[12rem] bottom-2 py-2 text-gray-500 text-sm'>Clear</button>
-                <button className='text-white absolute right-2.5 bottom-2 bg-crimsonRed hover:bg-darkRed rounded-2xl text-sm px-8 lg:px-12 py-2 font-bold'>Search</button>
+                <input type='search' className='focus:outline-none p-4 pl-10 w-full text-sm text-gray-900 rounded-t-lg' placeholder='Keywords' required='' value={searchTermLocal} onChange={e => setSearchTermLocal(e.currentTarget.value)}/>
+                <button className='absolute right-[12rem] bottom-2 py-2 text-gray-500 text-sm' onClick={clear}>Clear</button>
+                <button className='text-white absolute right-2.5 bottom-2 bg-crimsonRed hover:bg-darkRed rounded-2xl text-sm px-8 lg:px-12 py-2 font-bold' onClick={() => setSearchTerm(searchTermLocal)}>Search</button>
             </div>
             <div className='flex gap-10 justify-between py-2 px-3 items-center text-gray-800'>
                 <div className='flex gap-7'>
