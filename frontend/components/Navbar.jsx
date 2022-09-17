@@ -8,7 +8,6 @@ import logoImg from '../public/assets/images/logo.svg';
 import logoWhiteBackgroundImg from '../public/assets/images/logo_white.svg';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
-import { useAccount } from 'wagmi';
 
 export default function Navbar() {
     const [nav, setNav] = useState(false);

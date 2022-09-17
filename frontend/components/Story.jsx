@@ -8,10 +8,10 @@ import MintImageModal from './MintImageModal';
 import Image from 'next/image';
 import { useOutsideAlerter } from '../hooks/outsideAlerter';
 
-export default function Story({ collections, selectedCollection, setSelectedCollection, allOwnedImageTokens }) {
+export default function Story({ collections, selectedCollection, setSelectedCollection, imageTokens }) {
 
     const { visible: isFilteringCollection, setVisible: setIsFilteringCollection, ref: filterDivRef } = useOutsideAlerter();
-    const [ownedImageTokensDisplay, setOwnedImageTokensDisplay] = useState(allOwnedImageTokens);
+    const [imageTokensDisplay, setImageTokensDisplay] = useState(imageTokens);
     const [isMintModalOpen, setIsMintModalOpen] = useState(false);
     const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
     const [isMigrateModalOpen, setIsMigrateModalOpen] = useState(false);
@@ -19,20 +19,20 @@ export default function Story({ collections, selectedCollection, setSelectedColl
     const [searchValue, setSearchValue] = useState('');
 
     const search = () => {
-        const filteredTokens = allOwnedImageTokens.filter(({ tags }) => {
+        const filteredTokens = imageTokens.filter(({ tags }) => {
             return tags.some(tag => tag.includes(searchValue));
         });
-        setOwnedImageTokensDisplay(filteredTokens);
+        setImageTokensDisplay(filteredTokens);
     };
 
     const resetSearch = () => {
-        setOwnedImageTokensDisplay(allOwnedImageTokens);
+        setImageTokensDisplay(imageTokens);
         setSearchValue('');
     };
 
     useEffect(() => {
-        setOwnedImageTokensDisplay(allOwnedImageTokens);
-    }, [allOwnedImageTokens]);
+        setImageTokensDisplay(imageTokens);
+    }, [imageTokens]);
 
     return (
         <>
@@ -102,7 +102,7 @@ export default function Story({ collections, selectedCollection, setSelectedColl
                             </div>
                         </div>
                         <div className='pt-10 grid md:grid-cols-3 mx-auto w-4/5 gap-6'>
-                            {ownedImageTokensDisplay.map(({ id, imageUri, tags }) => {
+                            {imageTokensDisplay.map(({ id, imageUri, tags }) => {
                                 return (
                                     <div key={id} className='flex flex-col gap-2 bg-white'>
                                         <Image src={imageUri} alt='' height='305' width='428' />

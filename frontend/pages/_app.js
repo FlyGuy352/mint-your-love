@@ -6,21 +6,34 @@ import Head from 'next/head';
 import Navbar from '../components/Navbar';
 import { NotificationProvider } from '@web3uikit/core';
 //import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
-import { chain, configureChains, createClient, WagmiConfig } from 'wagmi';
+import { chain, configureChains, createClient, WagmiConfig, useNetwork } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
 import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { bscTestnet } from '../constants/bscTestnetChain';
-
-const { chains, provider } = configureChains([chain.polygonMumbai, bscTestnet], [publicProvider()]);
-const { connectors } = getDefaultWallets({ appName: 'Mint Your Love', chains });
-const wagmiClient = createClient({ autoConnect: true, connectors, provider });
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { MoralisProvider } from 'react-moralis';
 
 /*const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
   uri: 'https://api.studio.thegraph.com/query/34130/lovetokengorliv7/0.0.4'
 });*/
 
+const { chains, provider } = configureChains([chain.polygonMumbai, bscTestnet], [publicProvider()]);
+const { connectors } = getDefaultWallets({ appName: 'Mint Your Love', chains });
+const wagmiClient = createClient({ autoConnect: true, connectors, provider });
+const queryClient = new QueryClient();;
+
+const APP_ID_BSC = process.env.NEXT_PUBLIC_APP_ID_BSC;
+const SERVER_URL_BSC = process.env.NEXT_PUBLIC_SERVER_URL_BSC;
+
+const APP_ID_MUMBAI = process.env.NEXT_PUBLIC_APP_ID_MUMBAI;
+const SERVER_URL_MUMBAI = process.env.NEXT_PUBLIC_SERVER_URL_MUMBAI;
+
 function MyApp({ Component, pageProps }) {
+  const { chain: connectedChain } = useNetwork();
+  //console.log('connectedChain ', connectedChain);
+
+//appId={connectedChain?.id === 80001 ? APP_ID_MUMBAI : APP_ID_BSC} serverUrl={connectedChain?.id === 80001 ? SERVER_URL_MUMBAI : SERVER_URL_BSC}
   return (
     <>
       <Head>
@@ -31,10 +44,14 @@ function MyApp({ Component, pageProps }) {
       <WagmiConfig client={wagmiClient}>
         <RainbowKitProvider chains={chains}>
           {/*<ApolloProvider client={apolloClient}>*/}
-          <NotificationProvider>
-            <Navbar />
-            <Component {...pageProps} />
-          </NotificationProvider>
+          <MoralisProvider appId={connectedChain?.id === 80001 ? APP_ID_MUMBAI : APP_ID_BSC} serverUrl={connectedChain?.id === 80001 ? SERVER_URL_MUMBAI : SERVER_URL_BSC} >
+            <QueryClientProvider client={queryClient}>
+              <NotificationProvider>
+                <Navbar />
+                <Component {...pageProps} />
+              </NotificationProvider>
+            </QueryClientProvider>
+          </MoralisProvider>
           {/*</ApolloProvider>*/}
         </RainbowKitProvider>
       </WagmiConfig>

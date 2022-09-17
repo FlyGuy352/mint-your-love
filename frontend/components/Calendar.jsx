@@ -3,7 +3,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import { useState, useRef } from 'react';
 import MintNewDayModal from './MintNewDayModal';
 
-export default function Calendar({ collections, allOwnedEventTokens }) {
+export default function Calendar({ collections, eventTokens }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const calendarRef = useRef(null);
@@ -27,7 +27,7 @@ export default function Calendar({ collections, allOwnedEventTokens }) {
                     center: 'title',
                     right: 'today prev,next'
                 }}
-                events={allOwnedEventTokens}
+                events={eventTokens}
             />
             {isModalOpen && <MintNewDayModal collections={collections} setIsOpen={setIsModalOpen} />}
         </>

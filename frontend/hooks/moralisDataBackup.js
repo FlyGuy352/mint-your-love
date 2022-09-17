@@ -4,7 +4,8 @@ import { useMoralisQuery } from 'react-moralis';
 import { useAccount } from 'wagmi';
 import { useMoralis } from 'react-moralis';
 
-export const useTokenCollections = () => {
+export const useMoralisCollections = chainId => {
+    console.log('chainId ', chainId)
     const { address } = useAccount();
     const { isInitialized } = useMoralis();
 
@@ -25,7 +26,7 @@ export const useTokenCollections = () => {
                 },
                 onError: error => {
                     console.log('error', error);
-                    dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch owned collections', position: 'topL' });
+                    dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch owned collections from Moralis', position: 'topL' });
                 }
             });
 
@@ -36,7 +37,7 @@ export const useTokenCollections = () => {
                 },
                 onError: error => {
                     console.log('error', error);
-                    dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch linked collections', position: 'topL' });
+                    dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch linked collections from Moralis', position: 'topL' });
                 }
             });
         }
@@ -59,7 +60,7 @@ export const useTokenCollections = () => {
                 onSuccess: results => setCollections(processCollections(ownedCollections.concat(linkedCollections), results)),
                 onError: error => {
                     console.log('error', error);
-                    dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch tokens', position: 'topL' });
+                    dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch tokens from Moralis', position: 'topL' });
                 }
             });
         }
