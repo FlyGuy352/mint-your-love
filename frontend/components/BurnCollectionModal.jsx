@@ -1,24 +1,30 @@
 import { BsFillSuitHeartFill } from 'react-icons/bs';
 import { useContext, useState } from 'react';
 import { TokenContractContext } from './MyCollectionConnected';
-import { usePrepareContractWrite, useContractWrite } from 'wagmi';
+//import { usePrepareContractWrite, useContractWrite } from 'wagmi';
+import { useContract, useSigner, useNetwork, useAccount } from 'wagmi';
 import { useNotification } from '@web3uikit/core';
+import { useMutation, useQueryClient } from 'react-query';
 
 export default function BurnCollectionModal({ collectionId, collectionName, setIsOpen }) {
 
+    const { chain } = useNetwork();
+    const { address } = useAccount();
+    const lowerCaseAddress = address.toLowerCase();
+
     const [isCommitting, setIsCommitting] = useState(false);
     const { loveTokenAddress, loveTokenAbi } = useContext(TokenContractContext);
-
-    const { config } = usePrepareContractWrite({
+    const loveToken = useContract({ addressOrName: loveTokenAddress, contractInterface: loveTokenAbi, signerOrProvider: useSigner().data });
+    /*const { config } = usePrepareContractWrite({
         addressOrName: loveTokenAddress,
         contractInterface: loveTokenAbi,
         functionName: 'burnCollection',
         args: [collectionId]
     });
-    const { error, isError, isSuccess, write } = useContractWrite(config);
+    const { error, isError, isSuccess, write } = useContractWrite(config);*/
 
     const dispatch = useNotification();
-    if (isError && isCommitting) {
+    /*if (isError && isCommitting) {
         dispatch({
             type: 'error',
             message: 'Failed to burn collection',
@@ -34,12 +40,38 @@ export default function BurnCollectionModal({ collectionId, collectionName, setI
             position: 'topR'
         });
         setIsOpen(false);
-    }
+    }*/
 
-    const commit = () => {
+    const commit = async () => {
         setIsCommitting(true);
-        write();
+        const tx = await loveToken.burnCollection(collectionId);
+        await tx.wait();
+        dispatch({
+            type: 'success',
+            message: 'Collection burned',
+            title: `You have burned the ${collectionName} collection`,
+            position: 'topR'
+        });
     };
+
+    const queryClient = useQueryClient();
+    const mutation = useMutation(commit, {
+        onError: error => {
+            dispatch({ type: 'error', message: error.message, title: 'Failed to burn collection', position: 'topR' });
+        },
+        onSettled: () => setIsCommitting(false),
+        onSuccess: () => {
+            queryClient.setQueryData(['collections', { chainId: chain.id, address: lowerCaseAddress }], oldData => {
+                const newData = JSON.parse(JSON.stringify(oldData));
+                console.log('newData before splice ', newData)
+                console.log('index ', oldData.findIndex(({ objectid }) => objectid === collectionId));
+                newData.splice(oldData.findIndex(({ objectid }) => objectid === collectionId), 1);
+                console.log('new data after splice ')
+                return newData;
+            });
+            setIsOpen(false);
+        }
+    });
 
     return (
         <div className='relative z-10' aria-labelledby='modal-title' role='dialog' aria-modal='true'>
@@ -58,7 +90,7 @@ export default function BurnCollectionModal({ collectionId, collectionName, setI
                             </div>
                         </div>
                         <div className='px-4 py-3 flex flex-col md:flex-row-reverse items-stretch justify-center sm:px-6 gap-2 mb-2'>
-                            <button className='rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-500 flex items-center justify-center gap-1' onClick={commit}>
+                            <button className='rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-500 flex items-center justify-center gap-1' onClick={() => mutation.mutate()}>
                                 Commit <BsFillSuitHeartFill />
                             </button>
                             <button className='rounded-md border border-gray-400 bg-white px-4 py-2 text-sm font-medium text-gray-600 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-indigo-500' onClick={() => setIsOpen(false)}>Cancel</button>

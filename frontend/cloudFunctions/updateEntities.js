@@ -1,7 +1,7 @@
 Moralis.Cloud.afterSave('CollectionBurned', async request => {
     const logger = Moralis.Cloud.getLogger();
     const confirmed = request.object.get('confirmed')
-    logger.info(`Processing Tx - Confirmed ? : ${confirmed}`);
+    logger.info(`Processing CollectionBurned Tx - Confirmed ? : ${confirmed}`);
     if (confirmed) {
         const CollectionObject = Moralis.Object.extend('Collection');
         const query = new Moralis.Query(CollectionObject);
@@ -14,7 +14,7 @@ Moralis.Cloud.afterSave('CollectionBurned', async request => {
 Moralis.Cloud.afterSave('CollectionCreated', async request => {
     const logger = Moralis.Cloud.getLogger();
     const confirmed = request.object.get('confirmed')
-    logger.info(`Processing Tx - Confirmed ? : ${confirmed}`);
+    logger.info(`Processing CollectionCreated Tx - Confirmed ? : ${confirmed}`);
     if (confirmed) {
         const CollectionObject = Moralis.Object.extend('Collection');
         const collection = new CollectionObject();
@@ -30,7 +30,7 @@ Moralis.Cloud.afterSave('CollectionCreated', async request => {
 Moralis.Cloud.afterSave('LoverLinked', async request => {
     const logger = Moralis.Cloud.getLogger();
     const confirmed = request.object.get('confirmed')
-    logger.info(`Processing Tx - Confirmed ? : ${confirmed}`);
+    logger.info(`Processing LoverLinked Tx - Confirmed ? : ${confirmed}`);
     if (confirmed) {
         const CollectionObject = Moralis.Object.extend('Collection');
         const query = new Moralis.Query(CollectionObject);
@@ -44,40 +44,47 @@ Moralis.Cloud.afterSave('LoverLinked', async request => {
 Moralis.Cloud.afterSave('NftMinted', async request => {
     const logger = Moralis.Cloud.getLogger();
     const confirmed = request.object.get('confirmed')
-    logger.info(`Processing Tx - Confirmed ? : ${confirmed}`);
+    logger.info(`Processing NftMinted Tx - Confirmed ? : ${confirmed}`);
     if (confirmed) {
         const TokenObject = Moralis.Object.extend('Token');
-        const token = new TokenObject();
-        token.set('objectid', request.object.get('tokenId'));
+        const tokenQuery = new Moralis.Query(TokenObject);
+        tokenQuery.equalTo('objectid', request.object.get('tokenId'));
+        const token = await tokenQuery.first();
+
         token.set('timestamp', request.object.get('timestamp'));
         token.set('tags', request.object.get('tags'));
         token.set('uri', request.object.get('uri'));
         token.set('collectionId', request.object.get('collectionId'));
 
         const CollectionObject = Moralis.Object.extend('Collection');
-        const query = new Moralis.Query(CollectionObject);
-        query.equalTo('objectid', request.object.get('collectionId'));
-        const collection = await query.first();
+        const collectionQuery = new Moralis.Query(CollectionObject);
+        collectionQuery.equalTo('objectid', request.object.get('collectionId'));
+        const collection = await collectionQuery.first();
         token.set('profile', collection.get('profile'));
 
         await token.save();
     }
 });
 
-Moralis.Cloud.afterSave('Transfer', async request => {
+Moralis.Cloud.afterSave('Transferred', async request => {
     const logger = Moralis.Cloud.getLogger();
     const confirmed = request.object.get('confirmed')
-    logger.info(`Processing Tx - Confirmed ? : ${confirmed}`);
+    logger.info(`Processing Transferred Tx - Confirmed ? : ${confirmed}`);
+    const tokenId = request.object.get('tokenId');
     if (confirmed) {
         const TokenObject = Moralis.Object.extend('Token');
         const query = new Moralis.Query(TokenObject);
         query.equalTo('objectid', request.object.get('tokenId'));
         let token = await query.first();
-
-        if (!token) {
+        if (request.object.get('to') === '0x0000000000000000000000000000000000000000') {
+            logger.info('Burning token ' + tokenId);
+            return await token.destroy();
+        } else if (!token) {
+            logger.info('Transferring new token ' + tokenId);
             token = new TokenObject();
-            token.set('objectid', request.object.get('tokenId'));
+            token.set('objectid', tokenId);
         }
+        logger.info('Setting token owner address: ' + request.object.get('to'));
         token.set('ownerAddress', request.object.get('to'));
         await token.save();
     }

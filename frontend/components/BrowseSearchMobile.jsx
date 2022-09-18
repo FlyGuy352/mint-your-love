@@ -7,7 +7,7 @@ import TimeDropdown from './TimeDropdown';
 import { useOutsideAlerter } from '../hooks/outsideAlerter';
 import { BsFilter } from 'react-icons/bs';
 
-export default function BrowseSearch({ optionsSelected, setOptionsSelected, timeSelected, setTimeSelected, dropdownTitle }) {
+export default function BrowseSearch({ optionsSelected, setOptionsSelected, timeSelected, setTimeSelected, dropdownTitle, setSearchTerm, searchTermUncommitted, setSearchTermUncommitted }) {
     const { visible: isFilteringCategory, setVisible: setIsFilteringCategory, ref: categoryDivRef } = useOutsideAlerter();
     const { visible: isFilteringProfile, setVisible: setIsFilteringProfile, ref: profileDivRef } = useOutsideAlerter();
     const { visible: isFilteringTime, setVisible: setIsFilteringTime, ref: timeDivRef } = useOutsideAlerter();
@@ -21,9 +21,9 @@ export default function BrowseSearch({ optionsSelected, setOptionsSelected, time
                     <div className='flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none'>
                         <AiOutlineSearch color='gray' />
                     </div>
-                    <input type='search' className='focus:outline-none p-2 pl-10 w-full text-sm text-gray-900 rounded-lg border border-gray-200' placeholder='Keywords' required='' />
+                    <input type='search' className='focus:outline-none p-2 pl-10 w-full text-sm text-gray-900 rounded-lg border border-gray-200' placeholder='Keywords' required='' value={searchTermUncommitted} onChange={e => setSearchTermUncommitted(e.currentTarget.value)}/>
                 </div>
-                <button className='bg-darkPink rounded-lg text-sm px-8 py-2 font-bold w-5/6 border border-black'>Search</button>
+                <button className='bg-darkPink rounded-lg text-sm px-8 py-2 font-bold w-5/6 border border-black' onClick={() => setSearchTerm(searchTermUncommitted)}>Search</button>
             </div>
             <div className='mt-4 border-y border-gray-200 bg-white'>
                 <button className='text-sm py-2 font-bold w-full' onClick={() => setIsFiltering(true)}>
@@ -58,7 +58,7 @@ export default function BrowseSearch({ optionsSelected, setOptionsSelected, time
                             </div>
                             <div ref={timeDivRef}>
                                 <button className='w-full flex items-center bg-darkPink border border-black rounded-md text-sm py-1 tracking-wide cursor-pointer focus:outline-none focus:ring-4 focus:ring-lightPink transition ease-in-out duration-300' onClick={() => setIsFilteringTime(!isFilteringTime)}>
-                                    <div className='px-1'><ImHourGlass /></div><div className='mr-10'>{Object.entries(timeSelected).find(([, value]) => value)[0]}</div><div className='px-2 grow flex justify-end'>{isFilteringTime ? <AiOutlineUp /> : <AiOutlineDown />}</div>
+                                    <div className='px-1'><ImHourGlass /></div><div className='mr-10'>{Object.entries(timeSelected).find(([, value]) => value.selected)[0]}</div><div className='px-2 grow flex justify-end'>{isFilteringTime ? <AiOutlineUp /> : <AiOutlineDown />}</div>
                                 </button>
                                 {isFilteringTime && <TimeDropdown options={timeSelected} setState={setTimeSelected} />}
                             </div>

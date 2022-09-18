@@ -5,16 +5,15 @@ import safeFetch from '../utils/fetchWrapper';
 
 export const useIpfsTokens = ({ collectionId, browseFilters, tokens }) => {
     //const [cacheCollectionId, setCacheCollectionId] = useState(null);
-    
+
     const fetchTokens = async () => {
-        console.log('fetching... ', tokens)
+        console.log('Fetching all IPFS tokens: ', tokens)
         const fetchTokenInfo = ({ objectid, tags, uri }) => {
             const tokenUri = uri.replace('ipfs://', 'https://ipfs.io/ipfs/');
             return new Promise(async (resolve, reject) => {
                 try {
-                    console.log('tokenUri ', tokenUri)
-                    const tokenMetadata = await safeFetch(fetch(tokenUri, { signal: AbortSignal.timeout(10000) }));
-                    console.log('tokenMetadata ', tokenMetadata)
+                    const tokenMetadata = await safeFetch(fetch(tokenUri, { signal: AbortSignal.timeout(15000) }));
+                    console.log('Fetched single token metadata: ', tokenMetadata);
                     if (tokenMetadata.image) {
                         const imageUri = tokenMetadata.image.replace('ipfs://', 'https://ipfs.io/ipfs/');
                         resolve({ imageToken: { objectid, imageUri, tags } });
@@ -35,7 +34,7 @@ export const useIpfsTokens = ({ collectionId, browseFilters, tokens }) => {
 
         //setCacheCollectionId(collectionId);
         const allTokenInfo = await Promise.all(tokens.map(token => fetchTokenInfo(token)));
-        console.log('allTokenInfo ', allTokenInfo)
+        console.log('Fetched all token info: ', allTokenInfo);
         if (collectionId) {
             return allTokenInfo.reduce((acc, cur) => {
                 if (cur.imageToken) {
@@ -52,12 +51,14 @@ export const useIpfsTokens = ({ collectionId, browseFilters, tokens }) => {
     };
 
     const { data, isFetching, error } = useQuery(['tokens', 'ipfs', collectionId || browseFilters], fetchTokens, { 
-        enabled: !!tokens
+        enabled: !!tokens, keepPreviousData: true, refetchOnWindowFocus: false
     });
+    console.log('tokensdata col id ', collectionId)
+    console.log('tokens data ', data)
     const dispatch = useNotification();
     if (error) {
         console.log('error', error);
-        dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch tokens from IPFS', position: 'topL' });
+        dispatch({ type: 'error', message: error.message, title: 'Failed to fetch tokens from IPFS', position: 'topL' });
     }
 
     return { data, isFetching };

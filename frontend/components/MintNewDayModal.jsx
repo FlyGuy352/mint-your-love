@@ -4,15 +4,20 @@ import { GiRelationshipBounds } from 'react-icons/gi';
 import { BsFillSuitHeartFill } from 'react-icons/bs';
 import { useOutsideAlerter } from '../hooks/outsideAlerter';
 import { TokenContractContext } from './MyCollectionConnected';
-import { useContract, useSigner } from 'wagmi';
+import { useContract, useSigner, useNetwork, useAccount } from 'wagmi';
 import { useNotification } from '@web3uikit/core';
 import safeFetch from '../utils/fetchWrapper';
 import ChooseCollectionDropdown from './ChooseCollectionDropdown';
+import { useMutation, useQueryClient } from 'react-query';
+import { customError } from '../utils/workWithNativeTypes';
 
 export default function MintNewDayModal({ collections, setIsOpen }) {
+    const { chain } = useNetwork();
+    const { address } = useAccount();
+    const lowerCaseAddress = address.toLowerCase();
 
     const [eventDate, setEventDate] = useState(new Date().toISOString().split('T')[0]);
-    const [title, setTitle] = useState(false);
+    const [title, setTitle] = useState('');
     const [description, setDescription] = useState(false);
     const { visible: isChoosingCollection, setVisible: setIsChoosingCollection, ref: chooseCollectionDiv } = useOutsideAlerter();
     const { visible: isChoosingProfile, setVisible: setIsChoosingProfile, ref: chooseProfileDiv } = useOutsideAlerter();
@@ -47,47 +52,110 @@ export default function MintNewDayModal({ collections, setIsOpen }) {
         if (eventDate === null) {
             return dispatch({ type: 'error', message: 'Please indicate a date', title: 'Missing required fields', position: 'topR' });
         }
+        if (title.trim() === '') {
+            return dispatch({ type: 'error', message: 'Please write a title', title: 'Missing required fields', position: 'topR' });
+        }
+        if (collectionId === undefined) {
+            return dispatch({ type: 'error', message: 'Please select a collection', title: 'Missing required fields', position: 'topR' });
+        }
+        if (newCollectionName === '') {
+            return dispatch({ type: 'error', message: 'Please enter a new collection name', title: 'Missing required fields', position: 'topR' });
+        }
+        if (profileName === 'Relationship profile') {
+            return dispatch({ type: 'error', message: 'Please select a relationship profile', title: 'Missing required fields', position: 'topR' });
+        }
         return true;
     };
 
     const commit = async () => {
-        if (validate() === true) {
-            setIsCommitting(true);
+        //if (validate() === true) {
+        setIsCommitting(true);
 
-            const formData = new FormData();
-            formData.append('name', title);
-            formData.append('description', description);
-            formData.append('date', eventDate);
+        const formData = new FormData();
+        formData.append('name', title);
+        formData.append('description', description);
+        formData.append('date', eventDate);
 
-            try {
-                const data = await safeFetch(fetch('/api/pinToIpfs', { method: 'post', body: formData }));
-                if (data.success) {
-                    for (const ipfsHash of data.ipfsHashes) {
-                        try {
-                            const tx = collectionId === null ? await loveToken.mintNewCollection(`ipfs://${ipfsHash}`, newCollectionName, profileOptions.indexOf(profileName), []) :
-                                await loveToken.mintExistingCollection(`ipfs://${ipfsHash}`, collectionId, []);
-                            await tx.wait();
-                            dispatch({
-                                type: 'success',
-                                message: 'NFT minted',
-                                title: 'You have minted an NFT of your cherished memory',
-                                position: 'topR'
-                            });
-                            setIsOpen(false);
-                        } catch (error) {
-                            dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to mint NFT', position: 'topR' });
+        try {
+            const data = await safeFetch(fetch('/api/pinToIpfs', { method: 'post', body: formData }));
+            if (data.success) {
+                for (const ipfsHash of data.ipfsHashes) {
+                    try {
+                        const tx = collectionId === null ? await loveToken.mintNewCollection(`ipfs://${ipfsHash}`, newCollectionName, profileOptions.indexOf(profileName), []) :
+                            await loveToken.mintExistingCollection(`ipfs://${ipfsHash}`, collectionId, []);
+                        console.log('TX BEFORE WAIT ', tx);
+                        const receipt = await tx.wait();
+                        console.log('receipt ', receipt);
+                        dispatch({
+                            type: 'success',
+                            message: 'NFT minted',
+                            title: 'You have minted an NFT of your cherished memory',
+                            position: 'topR'
+                        }); 
+                        if (collectionId === null) {
+                            const collectionCreatedEventArgs = receipt.events[0].args;
+                            const nftMintedEventArgs = receipt.events[2].args;
+                            return {
+                                name: collectionCreatedEventArgs.name, tokenId: nftMintedEventArgs.tokenId.toString(), collectionId: nftMintedEventArgs.collectionId.toString(), uri: nftMintedEventArgs.uri
+                            };
+                        } else {
+                            const nftMintedEventArgs = receipt.events[1].args;
+                            return { 
+                                tokenId: nftMintedEventArgs.tokenId.toString(), collectionId: nftMintedEventArgs.collectionId.toString(), uri: nftMintedEventArgs.uri
+                            };
                         }
+                        //const nftMintedEventArgs = receipt.events[1].args;
+                        //return { tokenId: nftMintedEventArgs.tokenId, collectionId: nftMintedEventArgs.collectionId };
+                        //setIsOpen(false);
+                    } catch (error) {
+                        throw customError('Failed to mint NFT', error.message);
+                        //dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to mint NFT', position: 'topR' });
                     }
-                } else {
-                    dispatch({ type: 'error', message: JSON.stringify(data.error), title: 'Failed to pin NFT to IPFS', position: 'topR' });
                 }
-            } catch (error) {
-                dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch pinning endpoint', position: 'topR' });
-            } finally {
-                setIsCommitting(false);
+            } else {
+                throw customError('Failed to pin NFT to IPFS', data.error);
+                //dispatch({ type: 'error', message: JSON.stringify(data.error), title: 'Failed to pin NFT to IPFS', position: 'topR' });
             }
-        }
+        } catch (error) {
+            throw customError('Failed to fetch pinning endpoint', error.message);
+            //dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch pinning endpoint', position: 'topR' });
+        }/* finally {
+            setIsCommitting(false);
+        }*/
+       // }
     };
+
+    const queryClient = useQueryClient();
+    const mutation = useMutation(commit, {
+        onError: error => {
+            dispatch({ type: 'error', message: error.message, title: error.name, position: 'topR' });
+        },
+        onSettled: () => setIsCommitting(false),
+        onSuccess: newData => {
+            console.log('newData ', newData)
+            if (collectionId === null) {
+                queryClient.setQueryData(['collections', { chainId: chain.id, address: lowerCaseAddress }], oldData => {
+                    console.log('oldcollectiondata ', oldData)
+                    return [{ objectid: newData.collectionId, name: newData.name, ownerAddress: lowerCaseAddress }, ...oldData];
+                });
+            }
+            queryClient.setQueryData(['tokens', 'moralis', { chainId: chain.id, address: lowerCaseAddress }], oldData => {
+                console.log('oldtokendata moralis', oldData)
+                return [...oldData, { attributes: { objectid: newData.tokenId, collectionId: newData.collectionId, ownerAddress: lowerCaseAddress, tags: [], uri: newData.uri } }];
+            });
+
+            queryClient.setQueryData(['tokens', 'ipfs', newData.collectionId], oldData => {
+                console.log('oldtokendata ipfs', oldData)
+                console.log('new token data being set ', 
+                [...oldData? [...oldData.eventTokens] : [], { objectid: newData.tokenId, title, start: eventDate, allDay: true }]);
+                return {
+                    imageTokens: oldData?.imageTokens || [],
+                    eventTokens: [...oldData? [...oldData.eventTokens] : [], { objectid: newData.tokenId, title, start: eventDate, allDay: true }]
+                };
+            });
+            setIsOpen(false);
+        }
+    });
 
     return (
         <div className='relative z-10' aria-labelledby='modal-title' role='dialog' aria-modal='true'>
@@ -135,7 +203,7 @@ export default function MintNewDayModal({ collections, setIsOpen }) {
                             </div>
                         </div>
                         <div className='p-4 flex flex-col md:flex-row-reverse items-stretch justify-center sm:px-6 gap-2'>
-                            <button className='rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-500 flex items-center justify-center gap-1' onClick={commit}>
+                            <button className='rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-500 flex items-center justify-center gap-1' onClick={() => validate() && mutation.mutate()}>
                                 Commit <BsFillSuitHeartFill />
                             </button>
                             <button className='rounded-md border border-gray-400 bg-white px-4 py-2 text-sm font-medium text-gray-600 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-indigo-500' onClick={() => setIsOpen(false)}>Cancel</button>

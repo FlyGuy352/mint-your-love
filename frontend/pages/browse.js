@@ -14,6 +14,7 @@ export default function Browse() {
         profile: { STRAIGHT: { label: 'Straight', selected: true }, SAME_SEX: { label: 'Same-sex', selected: true }, OTHERS: { label: 'Others', selected: true } }
     });
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchTermUncommitted, setSearchTermUncommitted] = useState('');
 
     const dropdownTitle = title => {
         const options = optionsSelected[title.toLowerCase()];
@@ -31,19 +32,22 @@ export default function Browse() {
     };
 
     const [timeSelected, setTimeSelected] = useState({
-        'Any Time': true, 'Past Hour': false, 'Past 24 Hours': false, 'Past Week': false, 'Past Month': false, 'Past Year': false
+        'Any Time': { msSinceEpoch: 'ALL', selected: true }, 'Past Hour': { msSinceEpoch: 3600000, selected: false }, 'Past 24 Hours': { msSinceEpoch: 86400000, selected: false }, 
+        'Past Week': { msSinceEpoch: 604800000, selected: false }, 'Past Month': { msSinceEpoch: 2629800000, selected: false }, 'Past Year': { msSinceEpoch: 31556926000, selected: false }
     });
 
     const categories = Object.values(optionsSelected.category).filter(value => value.selected).map(value => value.label);
     const tags = [...categories, ...searchTerm ? [searchTerm.split(' ').filter(term => term)] : []];
-
     const profiles = Object.entries(optionsSelected.profile).filter(([, value]) => value.selected).map(([key]) => key);
+    const timeDifferenceInMs = Object.values(timeSelected).find(({ selected }) => selected).msSinceEpoch;
+    console.log('timeDifferenceInMs ', timeDifferenceInMs)
+
     const { data: moralisTokens, isFetching: isFetchingMoralis } = useMoralisTokens(
-        chain?.id, categories.includes('Others') ? 'ALL' : tags, profiles
+        chain?.id, categories.includes('Others') ? 'ALL' : tags, profiles, timeDifferenceInMs
     );
     console.log('isFetchingMoralis ', isFetchingMoralis)
     console.log('moralisTokens ', moralisTokens)
-    const { data, isFetching: isFetchingIpfs } = useIpfsTokens({ browseFilters: { tags, profiles }, tokens: moralisTokens });
+    const { data, isFetching: isFetchingIpfs } = useIpfsTokens({ browseFilters: { tags, profiles, timeDifferenceInMs }, tokens: moralisTokens });
     console.log('data ', data);
     console.log('isFetchingIpfs ', isFetchingIpfs)
     return (
@@ -51,10 +55,14 @@ export default function Browse() {
             <div className='hidden md:block mt-10'>
                 <BrowseSearch 
                     optionsSelected={optionsSelected} setOptionsSelected={setOptionsSelected} timeSelected={timeSelected} 
-                    setTimeSelected={setTimeSelected} dropdownTitle={dropdownTitle} searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>
+                    setTimeSelected={setTimeSelected} dropdownTitle={dropdownTitle} setSearchTerm={setSearchTerm} 
+                    searchTermUncommitted={searchTermUncommitted} setSearchTermUncommitted={setSearchTermUncommitted}/>
             </div>
             <div className='md:hidden mt-10'>
-                <BrowseSearchMobile optionsSelected={optionsSelected} setOptionsSelected={setOptionsSelected} timeSelected={timeSelected} setTimeSelected={setTimeSelected} dropdownTitle={dropdownTitle} />
+                <BrowseSearchMobile
+                    optionsSelected={optionsSelected} setOptionsSelected={setOptionsSelected} timeSelected={timeSelected} 
+                    setTimeSelected={setTimeSelected} dropdownTitle={dropdownTitle} setSearchTerm={setSearchTerm} 
+                    searchTermUncommitted={searchTermUncommitted} setSearchTermUncommitted={setSearchTermUncommitted}/>
             </div>
             <div className={`pt-10 grid mx-auto w-4/5 gap-6 ${(isFetchingMoralis || isFetchingIpfs || data.length === 0) ? 'flex justify-center' : 'md:grid-cols-3'}`}>
                 {

@@ -14,16 +14,16 @@ const pinNftToIpfs = async metadatas => {
                 pinFileResponse = await pinata.pinFileToIPFS(fileStream);
                 console.log('Successfully pushed image to pinata');
             } catch (error) {
-                console.log(`Error pushing image to pinata - ${error}`);
-                reject(error);
+                console.log(`Error pushing image to pinata - ${JSON.stringify(error)}`);
+                throw error;
             }
         }
         try {
             const { IpfsHash } = await pinata.pinJSONToIPFS({ name, description, attributes, ...pinFileResponse ? { image: `ipfs://${pinFileResponse.IpfsHash}` } : {} });
             ipfsHashes.push(IpfsHash);
         } catch (error) {
-            console.log(`Error uploading JSON to Pinata - ${error}`);
-            reject(error);
+            console.log(`Error uploading JSON to Pinata - ${JSON.stringify(error)}`);
+            throw error;
         }
     }
 

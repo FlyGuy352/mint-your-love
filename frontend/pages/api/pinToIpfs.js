@@ -29,7 +29,7 @@ export default async function handler(req, res) {
                 const ipfsHashes = await pinNftToIpfs(metadatas);
                 resolve(res.status(200).json({ success: true, ipfsHashes }));
             } catch (error) {
-                resolve(res.status(200).json({ error }));
+                resolve(res.status(200).json({ error: JSON.stringify(error) }));
             }
         });
     });

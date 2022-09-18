@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { AiOutlineDown, AiOutlineUp, AiOutlineSearch } from 'react-icons/ai';
 import { MdEvent, MdPerson } from 'react-icons/md';
 import { ImHourGlass } from 'react-icons/im';
@@ -6,15 +5,13 @@ import MultiselectDropdown from './MultiselectDropdown';
 import TimeDropdown from './TimeDropdown';
 import { useOutsideAlerter } from '../hooks/outsideAlerter';
 
-export default function BrowseSearch({ optionsSelected, setOptionsSelected, timeSelected, setTimeSelected, dropdownTitle, searchTerm, setSearchTerm }) {
+export default function BrowseSearch({ optionsSelected, setOptionsSelected, timeSelected, setTimeSelected, dropdownTitle, setSearchTerm, searchTermUncommitted, setSearchTermUncommitted }) {
     const { visible: isFilteringCategory, setVisible: setIsFilteringCategory, ref: categoryDivRef } = useOutsideAlerter();
     const { visible: isFilteringProfile, setVisible: setIsFilteringProfile, ref: profileDivRef } = useOutsideAlerter();
     const { visible: isFilteringTime, setVisible: setIsFilteringTime, ref: timeDivRef } = useOutsideAlerter();
 
-    const [searchTermLocal, setSearchTermLocal] = useState(searchTerm);
-
     const clear = () => {
-        setSearchTermLocal('');
+        setSearchTermUncommitted('');
         setSearchTerm('');
     };
 
@@ -29,7 +26,7 @@ export default function BrowseSearch({ optionsSelected, setOptionsSelected, time
 
         const cloneTime = { ...timeSelected };
         Object.keys(cloneTime).forEach(key => {
-            cloneTime[key] = key === 'Any Time';
+            cloneTime[key].selected = key === 'Any Time';
         });
         setTimeSelected(cloneTime);
     };
@@ -40,9 +37,9 @@ export default function BrowseSearch({ optionsSelected, setOptionsSelected, time
                 <div className='flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none'>
                     <AiOutlineSearch color='gray' />
                 </div>
-                <input type='search' className='focus:outline-none p-4 pl-10 w-full text-sm text-gray-900 rounded-t-lg' placeholder='Keywords' required='' value={searchTermLocal} onChange={e => setSearchTermLocal(e.currentTarget.value)}/>
+                <input type='search' className='focus:outline-none p-4 pl-10 w-full text-sm text-gray-900 rounded-t-lg' placeholder='Keywords' required='' value={searchTermUncommitted} onChange={e => setSearchTermUncommitted(e.currentTarget.value)}/>
                 <button className='absolute right-[12rem] bottom-2 py-2 text-gray-500 text-sm' onClick={clear}>Clear</button>
-                <button className='text-white absolute right-2.5 bottom-2 bg-crimsonRed hover:bg-darkRed rounded-2xl text-sm px-8 lg:px-12 py-2 font-bold' onClick={() => setSearchTerm(searchTermLocal)}>Search</button>
+                <button className='text-white absolute right-2.5 bottom-2 bg-crimsonRed hover:bg-darkRed rounded-2xl text-sm px-8 lg:px-12 py-2 font-bold' onClick={() => setSearchTerm(searchTermUncommitted)}>Search</button>
             </div>
             <div className='flex gap-10 justify-between py-2 px-3 items-center text-gray-800'>
                 <div className='flex gap-7'>
@@ -60,7 +57,7 @@ export default function BrowseSearch({ optionsSelected, setOptionsSelected, time
                     </div>
                     <div ref={timeDivRef}>
                         <button className='flex items-center bg-darkPink border border-black rounded-md text-sm py-1 tracking-wide cursor-pointer focus:outline-none focus:ring-4 focus:ring-lightPink transition ease-in-out duration-300' onClick={() => setIsFilteringTime(!isFilteringTime)}>
-                            <div className='px-1'><ImHourGlass /></div><div className='mr-10'>{Object.entries(timeSelected).find(([, value]) => value)[0]}</div><div className='px-2'>{isFilteringTime ? <AiOutlineUp /> : <AiOutlineDown />}</div>
+                            <div className='px-1'><ImHourGlass /></div><div className='mr-10'>{Object.entries(timeSelected).find(([, value]) => value.selected)[0]}</div><div className='px-2'>{isFilteringTime ? <AiOutlineUp /> : <AiOutlineDown />}</div>
                         </button>
                         {isFilteringTime && <TimeDropdown options={timeSelected} setState={setTimeSelected} />}
                     </div>

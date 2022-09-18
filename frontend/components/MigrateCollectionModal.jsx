@@ -6,13 +6,21 @@ import maticIcon from '../public/assets/icons/matic.svg';
 import bnbIcon from '../public/assets/icons/bnb.svg';
 import { useNotification } from '@web3uikit/core';
 import { TokenContractContext } from './MyCollectionConnected';
-import { useNetwork, usePrepareContractWrite, useContractWrite } from 'wagmi';
+//import { useNetwork, usePrepareContractWrite, useContractWrite } from 'wagmi';
+import { useContract, useSigner, useNetwork, useAccount } from 'wagmi';
 import networkMapping from '../constants/networkMapping.json';
+import { useMutation, useQueryClient } from 'react-query';
 //import avaIcon from '../public/assets/icons/avax.svg';
 //import sklIcon from '../public/assets/icons/skl.svg';
 
 export default function MigrateCollectionModal({ collectionId, setIsOpen }) {
+
+    const { chain } = useNetwork();
+    const { address } = useAccount();
+    const lowerCaseAddress = address.toLowerCase();
+
     const { loveTokenAddress, loveTokenAbi } = useContext(TokenContractContext);
+    const loveToken = useContract({ addressOrName: loveTokenAddress, contractInterface: loveTokenAbi, signerOrProvider: useSigner().data });
     const supportedChains = [
         { chainId: 97, domain: 0x62732d74, icon: bnbIcon, name: 'BSC Testnet' },
         { chainId: 80001, domain: 80001, icon: maticIcon, name: 'Polygon Mumbai' }
@@ -20,16 +28,16 @@ export default function MigrateCollectionModal({ collectionId, setIsOpen }) {
 
     const [targetChain, setTargetChain] = useState(null);
 
-    const { config } = usePrepareContractWrite({
+    /*const { config } = usePrepareContractWrite({
         addressOrName: loveTokenAddress,
         contractInterface: loveTokenAbi,
         functionName: 'transferCollection',
         args: [targetChain?.domain, targetChain?.address, collectionId]
     });
-    const { error, isError, isSuccess, write } = useContractWrite(config);
+    const { error, isError, isSuccess, write } = useContractWrite(config);*/
 
     const dispatch = useNotification();
-    if (isError && isCommitting) {
+    /*if (isError && isCommitting) {
         dispatch({
             type: 'error',
             message: 'Failed to migrate collection',
@@ -45,7 +53,7 @@ export default function MigrateCollectionModal({ collectionId, setIsOpen }) {
             position: 'topR'
         });
         setIsOpen(false);
-    }
+    }*/
 
     const setTargetChainInfo = name => {
         const targetChain = supportedChains.find(chain => chain.name === name);
@@ -55,7 +63,6 @@ export default function MigrateCollectionModal({ collectionId, setIsOpen }) {
 
     const [isCommitting, setIsCommitting] = useState(false);
 
-    const { chain } = useNetwork();
     const validate = () => {
         if (targetChain === null) {
             return dispatch({ type: 'error', message: 'Please select a target chain', title: 'Missing required info', position: 'topR' });
@@ -66,12 +73,36 @@ export default function MigrateCollectionModal({ collectionId, setIsOpen }) {
         return true;
     };
 
-    const commit = () => {
-        if (validate() === true) {
-            setIsCommitting(true);
-            write();
-        }
+    const commit = async () => {
+        setIsCommitting(true);
+        const tx = await loveToken.transferCollection(targetChain.domain, targetChain.address, collectionId);
+        await tx.wait();
+        dispatch({
+            type: 'success',
+            message: 'Collection migrated',
+            title: `You have migrated your collection to ${targetChain.name}`,
+            position: 'topR'
+        });
     };
+
+    const queryClient = useQueryClient();
+    const mutation = useMutation(commit, {
+        onError: error => {
+            dispatch({ type: 'error', message: error.message, title: 'Failed to migrate collection', position: 'topR' });
+        },
+        onSettled: () => setIsCommitting(false),
+        onSuccess: () => {
+            queryClient.setQueryData(['collections', { chainId: chain.id, address: lowerCaseAddress }], oldData => {
+                const newData = JSON.parse(JSON.stringify(oldData));
+                console.log('newData before splice ', newData)
+                console.log('index ', oldData.findIndex(({ objectid }) => objectid === collectionId));
+                newData.splice(oldData.findIndex(({ objectid }) => objectid === collectionId), 1);
+                console.log('new data after splice ')
+                return newData;
+            });
+            setIsOpen(false);
+        }
+    });
 
     return (
         <div className='relative z-10' aria-labelledby='modal-title' role='dialog' aria-modal='true'>
@@ -99,7 +130,7 @@ export default function MigrateCollectionModal({ collectionId, setIsOpen }) {
                             </div>
                         </div>
                         <div className='px-4 py-3 flex flex-col md:flex-row-reverse items-stretch justify-center sm:px-6 gap-2 mb-2'>
-                            <button className='rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-500 flex items-center justify-center gap-1' onClick={commit}>
+                            <button className='rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-red-500 flex items-center justify-center gap-1' onClick={() => validate() && mutation.mutate()}>
                                 Commit <BsFillSuitHeartFill />
                             </button>
                             <button className='rounded-md border border-gray-400 bg-white px-4 py-2 text-sm font-medium text-gray-600 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-indigo-500' onClick={() => setIsOpen(false)}>Cancel</button>

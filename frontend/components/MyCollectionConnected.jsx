@@ -42,7 +42,7 @@ export default function MyCollectionConnected() {
     `);*/
 
     const { address } = useAccount();
-    const { collections, isFetching: isFetchingMoralis } = useMoralisCollections(chain.id, address);
+    const { collections, isFetching: isFetchingMoralis } = useMoralisCollections(chain.id, address.toLowerCase());
     console.log('collections ', collections)
     const [selectedCollection, setSelectedCollection] = useState(null);
     useEffect(() => {
