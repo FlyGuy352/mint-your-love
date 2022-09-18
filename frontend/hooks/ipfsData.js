@@ -49,9 +49,9 @@ export const useIpfsTokens = ({ collectionId, browseFilters, tokens }) => {
             return allTokenInfo.filter(({ imageToken }) => imageToken).map(({ imageToken }) => imageToken);
         }
     };
-
+    console.log('tokens in ipfs fetcher', tokens)
     const { data, isFetching, error } = useQuery(['tokens', 'ipfs', collectionId || browseFilters], fetchTokens, { 
-        enabled: !!tokens, keepPreviousData: true, refetchOnWindowFocus: false
+        enabled: !!tokens && tokens.every(({ timestamp }) => timestamp), keepPreviousData: true, refetchOnWindowFocus: false
     });
     console.log('tokensdata col id ', collectionId)
     console.log('tokens data ', data)

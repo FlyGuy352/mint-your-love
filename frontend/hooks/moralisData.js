@@ -20,8 +20,9 @@ export const useMoralisCollections = (chainId, address) => {
    
     const dispatch = useNotification();
     const findCollections = async () => {
+        // Unlike the other queries, we do the transformation within the query function here because we cannot otherwise intercept the query cache data after user mints NFT
         const results = await mainQuery.descending('timestamp').find();
-        return results.map(({ attributes }) => attributes);
+        return uniqueObjectsArray(results.map(({ attributes }) => attributes), 'objectid');
     }
     const { data: collections, error: collectionsError } = useQuery(['collections', { chainId, address }], findCollections, { 
         refetchOnWindowFocus: false, refetchOnMount: false, refetchOnReconnect: false

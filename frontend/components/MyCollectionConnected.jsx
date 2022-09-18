@@ -44,9 +44,13 @@ export default function MyCollectionConnected() {
     const { address } = useAccount();
     const { collections, isFetching: isFetchingMoralis } = useMoralisCollections(chain.id, address.toLowerCase());
     console.log('collections ', collections)
+    console.log('selectedCollection ', selectedCollection)
     const [selectedCollection, setSelectedCollection] = useState(null);
     useEffect(() => {
-        setSelectedCollection(collections?.[0]);
+        if (!selectedCollection) {
+            console.log('setting selected collection to ', collections?.[0])
+            setSelectedCollection(collections?.[0]);
+        }
     }, [collections]);
 
     const { data, isFetching: isFetchingIpfs } = useIpfsTokens({ collectionId: selectedCollection?.objectid, tokens: selectedCollection?.tokens });

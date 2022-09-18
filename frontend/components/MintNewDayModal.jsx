@@ -58,10 +58,10 @@ export default function MintNewDayModal({ collections, setIsOpen }) {
         if (collectionId === undefined) {
             return dispatch({ type: 'error', message: 'Please select a collection', title: 'Missing required fields', position: 'topR' });
         }
-        if (newCollectionName === '') {
+        if (collectionId === null && newCollectionName === '') {
             return dispatch({ type: 'error', message: 'Please enter a new collection name', title: 'Missing required fields', position: 'topR' });
         }
-        if (profileName === 'Relationship profile') {
+        if (collectionId === null && profileName === 'Relationship profile') {
             return dispatch({ type: 'error', message: 'Please select a relationship profile', title: 'Missing required fields', position: 'topR' });
         }
         return true;
@@ -79,10 +79,10 @@ export default function MintNewDayModal({ collections, setIsOpen }) {
         try {
             const data = await safeFetch(fetch('/api/pinToIpfs', { method: 'post', body: formData }));
             if (data.success) {
-                for (const ipfsHash of data.ipfsHashes) {
+                for (const jsonHash of data.jsonHashes) {
                     try {
-                        const tx = collectionId === null ? await loveToken.mintNewCollection(`ipfs://${ipfsHash}`, newCollectionName, profileOptions.indexOf(profileName), []) :
-                            await loveToken.mintExistingCollection(`ipfs://${ipfsHash}`, collectionId, []);
+                        const tx = collectionId === null ? await loveToken.mintNewCollection(`ipfs://${jsonHash}`, newCollectionName, profileOptions.indexOf(profileName), []) :
+                            await loveToken.mintExistingCollection(`ipfs://${jsonHash}`, collectionId, []);
                         console.log('TX BEFORE WAIT ', tx);
                         const receipt = await tx.wait();
                         console.log('receipt ', receipt);

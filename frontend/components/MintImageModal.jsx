@@ -55,10 +55,10 @@ export default function MintImageModal({ collections, setIsOpen }) {
         if (collectionId === undefined) {
             return dispatch({ type: 'error', message: 'Please select a collection', title: 'Missing required fields', position: 'topR' });
         }
-        if (newCollectionName === '') {
+        if (collectionId === null && newCollectionName === '') {
             return dispatch({ type: 'error', message: 'Please enter a new collection name', title: 'Missing required fields', position: 'topR' });
         }
-        if (profileName === 'Relationship profile') {
+        if (collectionId === null && profileName === 'Relationship profile') {
             return dispatch({ type: 'error', message: 'Please select a relationship profile', title: 'Missing required fields', position: 'topR' });
         }
         return true;
@@ -79,10 +79,13 @@ export default function MintImageModal({ collections, setIsOpen }) {
         try {
             const data = await safeFetch(fetch('/api/pinToIpfs', { method: 'post', body: formData }));
             if (data.success) {
-                for (const ipfsHash of data.ipfsHashes) {
+                for (let i = 0; i < data.imgHashes.length; i++) {
+                    const imgHash = data.imgHashes[i];
+                    const jsonHash = data.jsonHashes[i];
+
                     try {
-                        const tx = collectionId === null ? await loveToken.mintNewCollection(`ipfs://${ipfsHash}`, newCollectionName, profileOptions.indexOf(profileName), tags) :
-                            await loveToken.mintExistingCollection(`ipfs://${ipfsHash}`, collectionId, tags);
+                        const tx = collectionId === null ? await loveToken.mintNewCollection(`ipfs://${jsonHash}`, newCollectionName, profileOptions.indexOf(profileName), tags) :
+                            await loveToken.mintExistingCollection(`ipfs://${jsonHash}`, collectionId, tags);
                         const receipt = await tx.wait();
                         dispatch({
                             type: 'success',
@@ -94,12 +97,14 @@ export default function MintImageModal({ collections, setIsOpen }) {
                             const collectionCreatedEventArgs = receipt.events[0].args;
                             const nftMintedEventArgs = receipt.events[2].args;
                             return {
-                                name: collectionCreatedEventArgs.name, tokenId: nftMintedEventArgs.tokenId.toString(), collectionId: nftMintedEventArgs.collectionId.toString(), uri: nftMintedEventArgs.uri
+                                name: collectionCreatedEventArgs.name, tokenId: nftMintedEventArgs.tokenId.toString(), collectionId: nftMintedEventArgs.collectionId.toString(), 
+                                imageUri: `https://ipfs.io/ipfs/${imgHash}`, jsonUri: `https://ipfs.io/ipfs/${jsonHash}`
                             };
                         } else {
                             const nftMintedEventArgs = receipt.events[1].args;
                             return { 
-                                tokenId: nftMintedEventArgs.tokenId.toString(), collectionId: nftMintedEventArgs.collectionId.toString(), uri: nftMintedEventArgs.uri
+                                tokenId: nftMintedEventArgs.tokenId.toString(), collectionId: nftMintedEventArgs.collectionId.toString(), 
+                                imageUri: `https://ipfs.io/ipfs/${imgHash}`, jsonUri: `https://ipfs.io/ipfs/${jsonHash}`
                             };
                         }
                     } catch (error) {
@@ -135,16 +140,16 @@ export default function MintImageModal({ collections, setIsOpen }) {
             }
             queryClient.setQueryData(['tokens', 'moralis', { chainId: chain.id, address: lowerCaseAddress }], oldData => {
                 console.log('oldtokendata moralis', oldData)
-                return [...oldData, { attributes: { objectid: newData.tokenId, collectionId: newData.collectionId, ownerAddress: lowerCaseAddress, tags, uri: newData.uri } }];
+                return [...oldData, { attributes: { objectid: newData.tokenId, collectionId: newData.collectionId, ownerAddress: lowerCaseAddress, tags, uri: newData.jsonUri } }];
             });
 
             queryClient.setQueryData(['tokens', 'ipfs', newData.collectionId], oldData => {
                 console.log('oldtokendata ipfs', oldData)
                 console.log('new token data being set ', 
-                [...oldData? [...oldData.imageTokens] : [], { objectid: newData.tokenId, uri: newData.uri, tags }]);
+                [...oldData? [...oldData.imageTokens] : [], { objectid: newData.tokenId, imageUri: newData.imageUri, tags }]);
                 return {
                     eventTokens: oldData?.eventTokens || [],
-                    imageTokens: [...oldData? [...oldData.imageTokens] : [], { objectid: newData.tokenId, uri: newData.uri, tags }]
+                    imageTokens: [...oldData? [...oldData.imageTokens] : [], { objectid: newData.tokenId, imageUri: newData.imageUri, tags }]
                 };
             });
             setIsOpen(false);

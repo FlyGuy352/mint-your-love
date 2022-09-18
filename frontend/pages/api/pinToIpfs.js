@@ -26,8 +26,8 @@ export default async function handler(req, res) {
                 };
             }) : [{ name: fields.name, description: fields.description, attributes: { eventDate: fields.date } }];
             try {
-                const ipfsHashes = await pinNftToIpfs(metadatas);
-                resolve(res.status(200).json({ success: true, ipfsHashes }));
+                const { imgHashes, jsonHashes } = await pinNftToIpfs(metadatas);
+                resolve(res.status(200).json({ success: true, imgHashes, jsonHashes }));
             } catch (error) {
                 resolve(res.status(200).json({ error: JSON.stringify(error) }));
             }
