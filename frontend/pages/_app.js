@@ -4,6 +4,7 @@ import '@fullcalendar/timegrid/main.css';
 import '../styles/globals.css';
 import Head from 'next/head';
 import Navbar from '../components/Navbar';
+import NoSSR from '../components/NoSSR';
 import { NotificationProvider } from '@web3uikit/core';
 import { chain, configureChains, createClient, WagmiConfig } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
@@ -30,7 +31,9 @@ function MyApp({ Component, pageProps }) {
           <QueryClientProvider client={queryClient}>
             <NotificationProvider>
               <Navbar />
-              <Component {...pageProps} />
+              <NoSSR>
+                <Component {...pageProps} />
+              </NoSSR>
             </NotificationProvider>
           </QueryClientProvider>
         </RainbowKitProvider>
