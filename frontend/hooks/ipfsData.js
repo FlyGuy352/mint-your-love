@@ -1,13 +1,10 @@
-//import { useState } from 'react';
 import { useQuery } from 'react-query';
 import { useNotification } from '@web3uikit/core';
 import safeFetch from '../utils/fetchWrapper';
 
 export const useIpfsTokens = ({ collectionId, browseFilters, tokens }) => {
-    //const [cacheCollectionId, setCacheCollectionId] = useState(null);
-
     const fetchTokens = async () => {
-        console.log('Fetching all IPFS tokens: ', tokens)
+        console.log('Fetching all IPFS tokens: ', tokens);
         const fetchTokenInfo = ({ objectid, tags, uri }) => {
             const tokenUri = uri.replace('ipfs://', 'https://ipfs.io/ipfs/');
             return new Promise(async (resolve, reject) => {
@@ -32,7 +29,6 @@ export const useIpfsTokens = ({ collectionId, browseFilters, tokens }) => {
             });
         };
 
-        //setCacheCollectionId(collectionId);
         const allTokenInfo = await Promise.all(tokens.map(token => fetchTokenInfo(token)));
         console.log('Fetched all token info: ', allTokenInfo);
         if (collectionId) {
@@ -49,12 +45,11 @@ export const useIpfsTokens = ({ collectionId, browseFilters, tokens }) => {
             return allTokenInfo.filter(({ imageToken }) => imageToken).map(({ imageToken }) => imageToken);
         }
     };
-    console.log('tokens in ipfs fetcher', tokens)
+
     const { data, isFetching, error } = useQuery(['tokens', 'ipfs', collectionId || browseFilters], fetchTokens, { 
         enabled: !!tokens && tokens.every(({ timestamp }) => timestamp), keepPreviousData: true, refetchOnWindowFocus: false
     });
-    console.log('tokensdata col id ', collectionId)
-    console.log('tokens data ', data)
+
     const dispatch = useNotification();
     if (error) {
         console.log('error', error);

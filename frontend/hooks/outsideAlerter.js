@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-export const useOutsideAlerter = (alertClickInside) => {
+export const useOutsideAlerter = alertClickInside => {
     const ref = useRef();
     const [visible, setVisible] = useState(false);
 

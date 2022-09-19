@@ -68,7 +68,6 @@ export default function MintNewDayModal({ collections, setIsOpen }) {
     };
 
     const commit = async () => {
-        //if (validate() === true) {
         setIsCommitting(true);
 
         const formData = new FormData();
@@ -77,52 +76,39 @@ export default function MintNewDayModal({ collections, setIsOpen }) {
         formData.append('date', eventDate);
 
         try {
-            const data = await safeFetch(fetch('/api/pinToIpfs', { method: 'post', body: formData }));
-            if (data.success) {
-                for (const jsonHash of data.jsonHashes) {
-                    try {
-                        const tx = collectionId === null ? await loveToken.mintNewCollection(`ipfs://${jsonHash}`, newCollectionName, profileOptions.indexOf(profileName), []) :
-                            await loveToken.mintExistingCollection(`ipfs://${jsonHash}`, collectionId, []);
-                        console.log('TX BEFORE WAIT ', tx);
-                        const receipt = await tx.wait();
-                        console.log('receipt ', receipt);
-                        dispatch({
-                            type: 'success',
-                            message: 'NFT minted',
-                            title: 'You have minted an NFT of your cherished memory',
-                            position: 'topR'
-                        }); 
-                        if (collectionId === null) {
-                            const collectionCreatedEventArgs = receipt.events[0].args;
-                            const nftMintedEventArgs = receipt.events[2].args;
-                            return {
-                                name: collectionCreatedEventArgs.name, tokenId: nftMintedEventArgs.tokenId.toString(), collectionId: nftMintedEventArgs.collectionId.toString(), uri: nftMintedEventArgs.uri
-                            };
-                        } else {
-                            const nftMintedEventArgs = receipt.events[1].args;
-                            return { 
-                                tokenId: nftMintedEventArgs.tokenId.toString(), collectionId: nftMintedEventArgs.collectionId.toString(), uri: nftMintedEventArgs.uri
-                            };
-                        }
-                        //const nftMintedEventArgs = receipt.events[1].args;
-                        //return { tokenId: nftMintedEventArgs.tokenId, collectionId: nftMintedEventArgs.collectionId };
-                        //setIsOpen(false);
-                    } catch (error) {
-                        throw customError('Failed to mint NFT', error.message);
-                        //dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to mint NFT', position: 'topR' });
+            const { success, jsonHash, error } = await safeFetch(fetch('/api/pinToIpfs', { method: 'post', body: formData }));
+            if (success) {
+                try {
+                    const tx = collectionId === null ? await loveToken.mintNewCollection(`ipfs://${jsonHash}`, newCollectionName, profileOptions.indexOf(profileName), []) :
+                        await loveToken.mintExistingCollection(`ipfs://${jsonHash}`, collectionId, []);
+                    const receipt = await tx.wait();
+                    dispatch({
+                        type: 'success',
+                        message: 'NFT minted',
+                        title: 'You have minted an NFT of your cherished memory',
+                        position: 'topR'
+                    }); 
+                    if (collectionId === null) {
+                        const collectionCreatedEventArgs = receipt.events[0].args;
+                        const nftMintedEventArgs = receipt.events[2].args;
+                        return {
+                            name: collectionCreatedEventArgs.name, tokenId: nftMintedEventArgs.tokenId.toString(), collectionId: nftMintedEventArgs.collectionId.toString(), uri: nftMintedEventArgs.uri
+                        };
+                    } else {
+                        const nftMintedEventArgs = receipt.events[1].args;
+                        return { 
+                            tokenId: nftMintedEventArgs.tokenId.toString(), collectionId: nftMintedEventArgs.collectionId.toString(), uri: nftMintedEventArgs.uri
+                        };
                     }
+                } catch (error) {
+                    throw customError('Failed to mint NFT', error.message);
                 }
             } else {
-                throw customError('Failed to pin NFT to IPFS', data.error);
-                //dispatch({ type: 'error', message: JSON.stringify(data.error), title: 'Failed to pin NFT to IPFS', position: 'topR' });
+                throw customError('Failed to pin NFT to IPFS', error);
             }
         } catch (error) {
             throw customError('Failed to fetch pinning endpoint', error.message);
-            //dispatch({ type: 'error', message: JSON.stringify(error), title: 'Failed to fetch pinning endpoint', position: 'topR' });
-        }/* finally {
-            setIsCommitting(false);
-        }*/
-       // }
+        }
     };
 
     const queryClient = useQueryClient();
@@ -132,22 +118,20 @@ export default function MintNewDayModal({ collections, setIsOpen }) {
         },
         onSettled: () => setIsCommitting(false),
         onSuccess: newData => {
-            console.log('newData ', newData)
-            if (collectionId === null) {
-                queryClient.setQueryData(['collections', { chainId: chain.id, address: lowerCaseAddress }], oldData => {
-                    console.log('oldcollectiondata ', oldData)
-                    return [{ objectid: newData.collectionId, name: newData.name, ownerAddress: lowerCaseAddress }, ...oldData];
-                });
-            }
-            queryClient.setQueryData(['tokens', 'moralis', { chainId: chain.id, address: lowerCaseAddress }], oldData => {
-                console.log('oldtokendata moralis', oldData)
-                return [...oldData, { attributes: { objectid: newData.tokenId, collectionId: newData.collectionId, ownerAddress: lowerCaseAddress, tags: [], uri: newData.uri } }];
-            });
+            queryClient.setQueryData(['collections', { chainId: chain.id, address: lowerCaseAddress }], oldData => {
+                const newToken = { objectid: newData.tokenId, collectionId: newData.collectionId, ownerAddress: lowerCaseAddress, tags: [], uri: newData.uri };
+                if (collectionId === null) {
+                    return [{ objectid: newData.collectionId, name: newData.name, ownerAddress: lowerCaseAddress, tokens: [newToken] }, ...oldData];
+                } else {
+                    const collection = oldData.find(({ objectid }) => objectid === collectionId);
+                    const newCollection = { ...collection, tokens: [...collection.tokens, newToken] };
+                    const newData = JSON.parse(JSON.stringify(oldData));
+                    newData[oldData.indexOf(collection)] = newCollection;
+                    return newData;
+                }
+            });     
 
             queryClient.setQueryData(['tokens', 'ipfs', newData.collectionId], oldData => {
-                console.log('oldtokendata ipfs', oldData)
-                console.log('new token data being set ', 
-                [...oldData? [...oldData.eventTokens] : [], { objectid: newData.tokenId, title, start: eventDate, allDay: true }]);
                 return {
                     imageTokens: oldData?.imageTokens || [],
                     eventTokens: [...oldData? [...oldData.eventTokens] : [], { objectid: newData.tokenId, title, start: eventDate, allDay: true }]

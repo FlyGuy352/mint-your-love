@@ -5,17 +5,11 @@ import '../styles/globals.css';
 import Head from 'next/head';
 import Navbar from '../components/Navbar';
 import { NotificationProvider } from '@web3uikit/core';
-//import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
 import { chain, configureChains, createClient, WagmiConfig } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
 import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { bscTestnet } from '../constants/bscTestnetChain';
 import { QueryClient, QueryClientProvider } from 'react-query';
-
-/*const apolloClient = new ApolloClient({
-  cache: new InMemoryCache(),
-  uri: 'https://api.studio.thegraph.com/query/34130/lovetokengorliv7/0.0.4'
-});*/
 
 const { chains, provider } = configureChains([chain.polygonMumbai, bscTestnet], [publicProvider()]);
 const { connectors } = getDefaultWallets({ appName: 'Mint Your Love', chains });
@@ -33,14 +27,12 @@ function MyApp({ Component, pageProps }) {
       </Head>
       <WagmiConfig client={wagmiClient}>
         <RainbowKitProvider chains={chains}>
-          {/*<ApolloProvider client={apolloClient}>*/}
           <QueryClientProvider client={queryClient}>
             <NotificationProvider>
               <Navbar />
               <Component {...pageProps} />
             </NotificationProvider>
           </QueryClientProvider>
-          {/*</ApolloProvider>*/}
         </RainbowKitProvider>
       </WagmiConfig>
     </>

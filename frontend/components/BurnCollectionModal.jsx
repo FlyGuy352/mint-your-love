@@ -1,7 +1,6 @@
 import { BsFillSuitHeartFill } from 'react-icons/bs';
 import { useContext, useState } from 'react';
 import { TokenContractContext } from './MyCollectionConnected';
-//import { usePrepareContractWrite, useContractWrite } from 'wagmi';
 import { useContract, useSigner, useNetwork, useAccount } from 'wagmi';
 import { useNotification } from '@web3uikit/core';
 import { useMutation, useQueryClient } from 'react-query';
@@ -15,32 +14,7 @@ export default function BurnCollectionModal({ collectionId, collectionName, setI
     const [isCommitting, setIsCommitting] = useState(false);
     const { loveTokenAddress, loveTokenAbi } = useContext(TokenContractContext);
     const loveToken = useContract({ addressOrName: loveTokenAddress, contractInterface: loveTokenAbi, signerOrProvider: useSigner().data });
-    /*const { config } = usePrepareContractWrite({
-        addressOrName: loveTokenAddress,
-        contractInterface: loveTokenAbi,
-        functionName: 'burnCollection',
-        args: [collectionId]
-    });
-    const { error, isError, isSuccess, write } = useContractWrite(config);*/
-
     const dispatch = useNotification();
-    /*if (isError && isCommitting) {
-        dispatch({
-            type: 'error',
-            message: 'Failed to burn collection',
-            title: JSON.stringify(error),
-            position: 'topR'
-        });
-        setIsCommitting(false);
-    } else if (isSuccess) {
-        dispatch({
-            type: 'success',
-            message: 'Collection burned',
-            title: `You have burned the ${collectionName} collection`,
-            position: 'topR'
-        });
-        setIsOpen(false);
-    }*/
 
     const commit = async () => {
         setIsCommitting(true);
@@ -86,7 +60,7 @@ export default function BurnCollectionModal({ collectionId, collectionName, setI
                         <div className='p-4'>
                             <div className='flex flex-col items-stretch gap-4 tracking-wide text-gray-700'>
                                 <p>Are you sure you wish to burn this collection?</p>
-                                <p>Please note that this action is <span className='font-bold'>irrevocable</span>!</p>
+                                <p>Please note that this action is <span className='font-bold'>irreversible</span>!</p>
                             </div>
                         </div>
                         <div className='px-4 py-3 flex flex-col md:flex-row-reverse items-stretch justify-center sm:px-6 gap-2 mb-2'>

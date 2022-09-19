@@ -9,8 +9,6 @@ import Image from 'next/image';
 import { useOutsideAlerter } from '../hooks/outsideAlerter';
 
 export default function Story({ collections, selectedCollection, setSelectedCollection, imageTokens }) {
-    console.log('collections ', collections)
-    console.log('selectedCollection ', selectedCollection)
     const { visible: isFilteringCollection, setVisible: setIsFilteringCollection, ref: filterDivRef } = useOutsideAlerter();
     const [imageTokensDisplay, setImageTokensDisplay] = useState(imageTokens);
     const [isMintModalOpen, setIsMintModalOpen] = useState(false);
@@ -114,7 +112,7 @@ export default function Story({ collections, selectedCollection, setSelectedColl
                                 );
                             })}
                         </div>
-                        {isLinkModalOpen && <LinkPartnerModal collectionId={selectedCollection.objectid} setIsOpen={setIsLinkModalOpen} />}
+                        {isLinkModalOpen && <LinkPartnerModal collection={selectedCollection} setCollection={setSelectedCollection} setIsOpen={setIsLinkModalOpen} />}
                         {isMigrateModalOpen && <MigrateCollectionModal collectionId={selectedCollection.objectid} setIsOpen={setIsMigrateModalOpen} />}
                         {isBurnModalOpen && <BurnCollectionModal collectionId={selectedCollection.objectid} collectionName={selectedCollection.name} setIsOpen={setIsBurnModalOpen} />}
                     </>

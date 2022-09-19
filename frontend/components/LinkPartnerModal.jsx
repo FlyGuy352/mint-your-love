@@ -6,7 +6,7 @@ import { TokenContractContext } from './MyCollectionConnected';
 import { useContract, useSigner, useNetwork, useAccount } from 'wagmi';
 import { useMutation, useQueryClient } from 'react-query';
 
-export default function LinkPartnerModal({ collectionId, setIsOpen }) {
+export default function LinkPartnerModal({ collection, setCollection, setIsOpen }) {
 
     const { chain } = useNetwork();
     const { address } = useAccount();
@@ -20,7 +20,7 @@ export default function LinkPartnerModal({ collectionId, setIsOpen }) {
         addressOrName: loveTokenAddress,
         contractInterface: loveTokenAbi,
         functionName: 'linkLover',
-        args: [partnerAddress, collectionId]
+        args: [partnerAddress, selectionCollection.objectid]
     });
     const { error, isError, isSuccess, write } = useContractWrite(config);
 
@@ -48,7 +48,7 @@ export default function LinkPartnerModal({ collectionId, setIsOpen }) {
     const dispatch = useNotification();
     const commit = async () => {
         setIsCommitting(true);
-        const tx = await loveToken.linkLover(partnerAddress, collectionId);
+        const tx = await loveToken.linkLover(partnerAddress, collection.objectid);
         await tx.wait();
         dispatch({
             type: 'success',
@@ -66,13 +66,15 @@ export default function LinkPartnerModal({ collectionId, setIsOpen }) {
         },
         onSettled: () => setIsCommitting(false),
         onSuccess: () => {
+            console.log(' collection.objectid ',  collection.objectid)
             queryClient.setQueryData(['collections', { chainId: chain.id, address: lowerCaseAddress }], oldData => {
-                const collection = oldData.find(({ objectid }) => objectid === collectionId);
-                const newCollection = { ...collection, linkedPartnerAddress: partnerAddress };
+                const oldCollection = oldData.find(({ objectid }) => objectid === collection.objectid);
+                const newCollection = { ...oldCollection, linkedPartnerAddress: partnerAddress };
                 const newData = JSON.parse(JSON.stringify(oldData));
-                newData[oldData.indexOf(collection)] = newCollection;
+                newData[oldData.indexOf(oldCollection)] = newCollection;
                 return newData;
             });
+            setCollection({ ...collection, linkedPartnerAddress: partnerAddress });
             setIsOpen(false);
         }
     });

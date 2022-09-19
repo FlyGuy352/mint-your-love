@@ -32,24 +32,19 @@ export default function Browse() {
     };
 
     const [timeSelected, setTimeSelected] = useState({
-        'Any Time': { msSinceEpoch: 'ALL', selected: true }, 'Past Hour': { msSinceEpoch: 3600000, selected: false }, 'Past 24 Hours': { msSinceEpoch: 86400000, selected: false }, 
-        'Past Week': { msSinceEpoch: 604800000, selected: false }, 'Past Month': { msSinceEpoch: 2629800000, selected: false }, 'Past Year': { msSinceEpoch: 31556926000, selected: false }
+        'Any Time': { seconds: 'ALL', selected: true }, 'Past Hour': { seconds: 3600, selected: false }, 'Past 24 Hours': { seconds: 86400, selected: false }, 
+        'Past Week': { seconds: 604800, selected: false }, 'Past Month': { seconds: 2628288, selected: false }, 'Past Year': { seconds: 31536000, selected: false }
     });
 
     const categories = Object.values(optionsSelected.category).filter(value => value.selected).map(value => value.label);
     const tags = [...categories, ...searchTerm ? [searchTerm.split(' ').filter(term => term)] : []];
     const profiles = Object.entries(optionsSelected.profile).filter(([, value]) => value.selected).map(([key]) => key);
-    const timeDifferenceInMs = Object.values(timeSelected).find(({ selected }) => selected).msSinceEpoch;
-    console.log('timeDifferenceInMs ', timeDifferenceInMs)
+    const seconds = Object.values(timeSelected).find(({ selected }) => selected).seconds;
 
     const { data: moralisTokens, isFetching: isFetchingMoralis } = useMoralisTokens(
-        chain?.id, categories.includes('Others') ? 'ALL' : tags, profiles, timeDifferenceInMs
+        chain?.id, categories.includes('Others') ? 'ALL' : tags, profiles, seconds
     );
-    console.log('isFetchingMoralis ', isFetchingMoralis)
-    console.log('moralisTokens ', moralisTokens)
-    const { data, isFetching: isFetchingIpfs } = useIpfsTokens({ browseFilters: { tags, profiles, timeDifferenceInMs }, tokens: moralisTokens });
-    console.log('data ', data);
-    console.log('isFetchingIpfs ', isFetchingIpfs)
+    const { data, isFetching: isFetchingIpfs } = useIpfsTokens({ browseFilters: { tags, profiles, seconds }, tokens: moralisTokens });
     return (
         <>
             <div className='hidden md:block mt-10'>

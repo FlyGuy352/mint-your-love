@@ -7,48 +7,24 @@ import 'react-tabs/style/react-tabs.css';
 import { useAccount, useNetwork } from 'wagmi';
 import networkMapping from '../constants/networkMapping.json';
 import loveTokenAbi from '../constants/LoveToken.json';
-//import { useQuery, gql } from '@apollo/client';
 import { useMoralisCollections } from '../hooks/moralisData';
 import { useIpfsTokens } from '../hooks/ipfsData';
+import { usePreviousValue } from '../hooks/previousValue';
 
 export const TokenContractContext = createContext();
 
 export default function MyCollectionConnected() {
     const { chain } = useNetwork();
     const loveTokenAddress = networkMapping[chain.id].loveToken.at(-1);
+    const { address } = useAccount();    
+    const previousChainId = usePreviousValue(chain.id);
+    const previousAddress = usePreviousValue(address);
 
-    /*const { loading, error, data } = useQuery(gql`
-    {
-    collections(filter: {
-        and: [
-            { or: [ { ownerAddress: { eq: "${address}" } }, { linkedPartnerAddress: { eq: "${address}" } } ] },
-            { active: { eq: true } }
-        ]
-    }, orderBy: timestamp, orderDirection: desc) {
-        id
-        timestamp
-        name
-        tokens {
-            id
-            tags
-            ownerAddress
-            uri
-        }
-        profile
-        ownerAddress
-        linkedPartnerAddress
-    }
-    }
-    `);*/
-
-    const { address } = useAccount();
     const { collections, isFetching: isFetchingMoralis } = useMoralisCollections(chain.id, address.toLowerCase());
-    console.log('collections ', collections)
-    console.log('selectedCollection ', selectedCollection)
+    const previousCollectionLength = usePreviousValue(collections?.length);
     const [selectedCollection, setSelectedCollection] = useState(null);
     useEffect(() => {
-        if (!selectedCollection) {
-            console.log('setting selected collection to ', collections?.[0])
+        if (!selectedCollection || chain.id !== previousChainId || address !== previousAddress || collections?.length !== previousCollectionLength) {
             setSelectedCollection(collections?.[0]);
         }
     }, [collections]);

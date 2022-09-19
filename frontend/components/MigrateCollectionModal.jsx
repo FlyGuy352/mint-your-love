@@ -6,12 +6,9 @@ import maticIcon from '../public/assets/icons/matic.svg';
 import bnbIcon from '../public/assets/icons/bnb.svg';
 import { useNotification } from '@web3uikit/core';
 import { TokenContractContext } from './MyCollectionConnected';
-//import { useNetwork, usePrepareContractWrite, useContractWrite } from 'wagmi';
 import { useContract, useSigner, useNetwork, useAccount } from 'wagmi';
 import networkMapping from '../constants/networkMapping.json';
 import { useMutation, useQueryClient } from 'react-query';
-//import avaIcon from '../public/assets/icons/avax.svg';
-//import sklIcon from '../public/assets/icons/skl.svg';
 
 export default function MigrateCollectionModal({ collectionId, setIsOpen }) {
 
@@ -27,33 +24,8 @@ export default function MigrateCollectionModal({ collectionId, setIsOpen }) {
     ];
 
     const [targetChain, setTargetChain] = useState(null);
-
-    /*const { config } = usePrepareContractWrite({
-        addressOrName: loveTokenAddress,
-        contractInterface: loveTokenAbi,
-        functionName: 'transferCollection',
-        args: [targetChain?.domain, targetChain?.address, collectionId]
-    });
-    const { error, isError, isSuccess, write } = useContractWrite(config);*/
-
+    
     const dispatch = useNotification();
-    /*if (isError && isCommitting) {
-        dispatch({
-            type: 'error',
-            message: 'Failed to migrate collection',
-            title: JSON.stringify(error),
-            position: 'topR'
-        });
-        setIsCommitting(false);
-    } else if (isSuccess) {
-        dispatch({
-            type: 'success',
-            message: 'Collection migrated',
-            title: `You have migrated your collection to ${targetChain.name}`,
-            position: 'topR'
-        });
-        setIsOpen(false);
-    }*/
 
     const setTargetChainInfo = name => {
         const targetChain = supportedChains.find(chain => chain.name === name);
@@ -76,6 +48,7 @@ export default function MigrateCollectionModal({ collectionId, setIsOpen }) {
     const commit = async () => {
         setIsCommitting(true);
         const tx = await loveToken.transferCollection(targetChain.domain, targetChain.address, collectionId);
+        console.log(tx);
         await tx.wait();
         dispatch({
             type: 'success',
@@ -94,10 +67,7 @@ export default function MigrateCollectionModal({ collectionId, setIsOpen }) {
         onSuccess: () => {
             queryClient.setQueryData(['collections', { chainId: chain.id, address: lowerCaseAddress }], oldData => {
                 const newData = JSON.parse(JSON.stringify(oldData));
-                console.log('newData before splice ', newData)
-                console.log('index ', oldData.findIndex(({ objectid }) => objectid === collectionId));
                 newData.splice(oldData.findIndex(({ objectid }) => objectid === collectionId), 1);
-                console.log('new data after splice ')
                 return newData;
             });
             setIsOpen(false);

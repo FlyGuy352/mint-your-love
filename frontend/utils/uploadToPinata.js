@@ -4,32 +4,30 @@ const pinataApiKey = process.env.PINATA_API_KEY;
 const pinataApiSecret = process.env.PINATA_API_SECRET;
 const pinata = pinataSDK(pinataApiKey, pinataApiSecret);
 
-const pinNftToIpfs = async metadatas => {
-    const imgHashes = [];
-    const jsonHashes = [];
+const pinNftToIpfs = async ({ name, description, attributes, fileStream }) => {
+    let imgHash;
+    let jsonHash;
 
-    for (const { name, description, attributes, fileStream } of metadatas) {
-        let pinFileResponse;
-        if (fileStream) {
-            try {
-                pinFileResponse = await pinata.pinFileToIPFS(fileStream);
-                console.log('Successfully pushed image to pinata');
-                imgHashes.push(pinFileResponse.IpfsHash);
-            } catch (error) {
-                console.log(`Error pushing image to pinata - ${JSON.stringify(error)}`);
-                throw error;
-            }
-        }
+    let pinFileResponse;
+    if (fileStream) {
         try {
-            const { IpfsHash } = await pinata.pinJSONToIPFS({ name, description, attributes, ...pinFileResponse ? { image: `ipfs://${pinFileResponse.IpfsHash}` } : {} });
-            jsonHashes.push(IpfsHash);
+            pinFileResponse = await pinata.pinFileToIPFS(fileStream);
+            console.log('Successfully pushed image to pinata');
+            imgHash = pinFileResponse.IpfsHash;
         } catch (error) {
-            console.log(`Error uploading JSON to Pinata - ${JSON.stringify(error)}`);
+            console.log(`Error pushing image to pinata - ${JSON.stringify(error)}`);
             throw error;
         }
     }
+    try {
+        const { IpfsHash } = await pinata.pinJSONToIPFS({ name, description, attributes, ...pinFileResponse ? { image: `ipfs://${pinFileResponse.IpfsHash}` } : {} });
+        jsonHash = IpfsHash;
+    } catch (error) {
+        console.log(`Error uploading JSON to Pinata - ${JSON.stringify(error)}`);
+        throw error;
+    }
 
-    return { imgHashes, jsonHashes };
+    return { imgHash, jsonHash };
 };
 
 module.exports = { pinNftToIpfs };

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { AiOutlineCloudUpload } from 'react-icons/ai';
+import { useNotification } from '@web3uikit/core';
 
-export default function ImageUpload({ files, setFiles }) {
+export default function ImageUpload({ file, setFile }) {
 
     const [isUploaded, setIsUploaded] = useState(false);
 
@@ -21,6 +22,7 @@ export default function ImageUpload({ files, setFiles }) {
         e.dataTransfer.dropEffect = 'copy';
     };
 
+    const dispatch = useNotification();
     const handleDrop = e => {
         if (isUploaded) {
             return;
@@ -28,15 +30,17 @@ export default function ImageUpload({ files, setFiles }) {
         e.preventDefault();
         e.stopPropagation();
         const uploadedFiles = [...e.dataTransfer.files];
-        if (uploadedFiles && uploadedFiles.length > 0) {
-            setFiles(uploadedFiles);
+        if (uploadedFiles?.length > 1) {
+            dispatch({ type: 'error', message: 'Please upload just one file', title: 'Limit exceeded', position: 'topR' });
+        } else if (uploadedFiles?.length == 1) {
+            setFile(uploadedFiles[0]);
             setIsUploaded(true);
         }
     };
 
     const handleFileInputChange = e => {
-        if (e.currentTarget.files.length > 0) {
-            setFiles([...e.currentTarget.files]);
+        if (e.currentTarget.files.length === 1) {
+            setFile(e.currentTarget.files[0]);
             setIsUploaded(true);
         }
     };
@@ -48,7 +52,7 @@ export default function ImageUpload({ files, setFiles }) {
                 <span className='flex flex-col gap-3 p-4 items-center'>
                     <div className='cursor-pointer' title='Change selected image'><AiOutlineCloudUpload size={50} /></div>
                     {!isUploaded && <span className='text-gray-500 text-xs'>Drag and drop or browse to choose a file</span>}
-                    {isUploaded && <span className='text-gray-700 text-xs'>{`Selected file${files.length > 1 ? 's' : ''}: ${files.map(({ name }) => name).join(',')}`}</span>}
+                    {isUploaded && <span className='text-gray-700 text-xs'>{`Selected file: ${file.name}`}</span>}
                 </span>
                 <input type='file' className='hidden' accept='.png,.jpg' onChange={e => handleFileInputChange(e)} />
             </label>

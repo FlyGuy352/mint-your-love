@@ -19,7 +19,7 @@ Moralis.Cloud.afterSave('CollectionCreated', async request => {
         const CollectionObject = Moralis.Object.extend('Collection');
         const collection = new CollectionObject();
         collection.set('objectid', request.object.get('collectionId'));
-        collection.set('timestamp', request.object.get('timestamp'));
+        collection.set('timestamp', request.object.get('timestamp_decimal'));
         collection.set('name', request.object.get('name'));
         collection.set('profile', ['STRAIGHT', 'SAME_SEX', 'OTHERS'][request.object.get('profile')]);
         collection.set('ownerAddress', request.object.get('owner'));
@@ -51,7 +51,7 @@ Moralis.Cloud.afterSave('NftMinted', async request => {
         tokenQuery.equalTo('objectid', request.object.get('tokenId'));
         const token = await tokenQuery.first();
 
-        token.set('timestamp', request.object.get('timestamp'));
+        token.set('timestamp', request.object.get('timestamp_decimal'));
         token.set('tags', request.object.get('tags'));
         token.set('uri', request.object.get('uri'));
         token.set('collectionId', request.object.get('collectionId'));

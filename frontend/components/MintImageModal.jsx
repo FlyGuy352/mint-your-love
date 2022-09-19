@@ -18,7 +18,7 @@ export default function MintImageModal({ collections, setIsOpen }) {
     const { address } = useAccount();
     const lowerCaseAddress = address.toLowerCase();
 
-    const [files, setFiles] = useState([]);
+    const [file, setFile] = useState(null);
     const { visible: isChoosingCollection, setVisible: setIsChoosingCollection, ref: chooseCollectionDiv } = useOutsideAlerter();
     const { visible: isChoosingProfile, setVisible: setIsChoosingProfile, ref: chooseProfileDiv } = useOutsideAlerter();
     const [collectionId, setCollectionId] = useState(undefined);
@@ -49,7 +49,7 @@ export default function MintImageModal({ collections, setIsOpen }) {
     };
 
     const validate = () => {
-        if (files.length === 0) {
+        if (file === null) {
             return dispatch({ type: 'error', message: 'Please upload a file', title: 'Missing required fields', position: 'topR' });
         }
         if (collectionId === undefined) {
@@ -71,57 +71,44 @@ export default function MintImageModal({ collections, setIsOpen }) {
         formData.append('name', 'Testing');
         formData.append('description', 'Testing');
         tags.forEach((tag, index) => formData.append(`tag${index}`, tag));
-
-        files.forEach((file, index) => {
-            formData.append(`file${index}`, file);
-        });
+        formData.append('file', file);
 
         try {
-            const data = await safeFetch(fetch('/api/pinToIpfs', { method: 'post', body: formData }));
-            if (data.success) {
-                for (let i = 0; i < data.imgHashes.length; i++) {
-                    const imgHash = data.imgHashes[i];
-                    const jsonHash = data.jsonHashes[i];
-
-                    try {
-                        const tx = collectionId === null ? await loveToken.mintNewCollection(`ipfs://${jsonHash}`, newCollectionName, profileOptions.indexOf(profileName), tags) :
-                            await loveToken.mintExistingCollection(`ipfs://${jsonHash}`, collectionId, tags);
-                        const receipt = await tx.wait();
-                        dispatch({
-                            type: 'success',
-                            message: 'NFT minted',
-                            title: 'You have minted an NFT of your cherished memory',
-                            position: 'topR'
-                        });
-                        if (collectionId === null) {
-                            const collectionCreatedEventArgs = receipt.events[0].args;
-                            const nftMintedEventArgs = receipt.events[2].args;
-                            return {
-                                name: collectionCreatedEventArgs.name, tokenId: nftMintedEventArgs.tokenId.toString(), collectionId: nftMintedEventArgs.collectionId.toString(), 
-                                imageUri: `https://ipfs.io/ipfs/${imgHash}`, jsonUri: `https://ipfs.io/ipfs/${jsonHash}`
-                            };
-                        } else {
-                            const nftMintedEventArgs = receipt.events[1].args;
-                            return { 
-                                tokenId: nftMintedEventArgs.tokenId.toString(), collectionId: nftMintedEventArgs.collectionId.toString(), 
-                                imageUri: `https://ipfs.io/ipfs/${imgHash}`, jsonUri: `https://ipfs.io/ipfs/${jsonHash}`
-                            };
-                        }
-                    } catch (error) {
-                        throw customError('Failed to mint NFT', error.message);
-                        //dispatch({ type: 'error', message: error.message, title: 'Failed to mint NFT', position: 'topR' });
+            const { success, jsonHash, imgHash, error } = await safeFetch(fetch('/api/pinToIpfs', { method: 'post', body: formData }));
+            if (success) {
+                try {
+                    const tx = collectionId === null ? await loveToken.mintNewCollection(`ipfs://${jsonHash}`, newCollectionName, profileOptions.indexOf(profileName), tags) :
+                        await loveToken.mintExistingCollection(`ipfs://${jsonHash}`, collectionId, tags);
+                    const receipt = await tx.wait();
+                    dispatch({
+                        type: 'success',
+                        message: 'NFT minted',
+                        title: 'You have minted an NFT of your cherished memory',
+                        position: 'topR'
+                    });
+                    if (collectionId === null) {
+                        const collectionCreatedEventArgs = receipt.events[0].args;
+                        const nftMintedEventArgs = receipt.events[2].args;
+                        return {
+                            name: collectionCreatedEventArgs.name, tokenId: nftMintedEventArgs.tokenId.toString(), collectionId: nftMintedEventArgs.collectionId.toString(), 
+                            imageUri: `https://ipfs.io/ipfs/${imgHash}`, jsonUri: `https://ipfs.io/ipfs/${jsonHash}`
+                        };
+                    } else {
+                        const nftMintedEventArgs = receipt.events[1].args;
+                        return { 
+                            tokenId: nftMintedEventArgs.tokenId.toString(), collectionId: nftMintedEventArgs.collectionId.toString(), 
+                            imageUri: `https://ipfs.io/ipfs/${imgHash}`, jsonUri: `https://ipfs.io/ipfs/${jsonHash}`
+                        };
                     }
+                } catch (error) {
+                    throw customError('Failed to mint NFT', error.message);
                 }
             } else {
-                throw customError('Failed to pin NFT to IPFS', data.error);
-                //dispatch({ type: 'error', message: data.error, title: 'Failed to pin NFT to IPFS', position: 'topR' });
+                throw customError('Failed to pin NFT to IPFS', error);
             }
         } catch (error) {
             throw customError('Failed to fetch pinning endpoint', error.message);
-            //dispatch({ type: 'error', message: error.message, title: 'Failed to fetch pinning endpoint', position: 'topR' });
-        } /*finally {
-            setIsCommitting(false);
-        }*/
+        }
     };
 
     const queryClient = useQueryClient();
@@ -131,22 +118,20 @@ export default function MintImageModal({ collections, setIsOpen }) {
         },
         onSettled: () => setIsCommitting(false),
         onSuccess: newData => {
-            console.log('newData ', newData)
-            if (collectionId === null) {
-                queryClient.setQueryData(['collections', { chainId: chain.id, address: lowerCaseAddress }], oldData => {
-                    console.log('oldcollectiondata ', oldData)
-                    return [{ objectid: newData.collectionId, name: newData.name, ownerAddress: lowerCaseAddress }, ...oldData];
-                });
-            }
-            queryClient.setQueryData(['tokens', 'moralis', { chainId: chain.id, address: lowerCaseAddress }], oldData => {
-                console.log('oldtokendata moralis', oldData)
-                return [...oldData, { attributes: { objectid: newData.tokenId, collectionId: newData.collectionId, ownerAddress: lowerCaseAddress, tags, uri: newData.jsonUri } }];
-            });
+            queryClient.setQueryData(['collections', { chainId: chain.id, address: lowerCaseAddress }], oldData => {
+                const newToken = { objectid: newData.tokenId, collectionId: newData.collectionId, ownerAddress: lowerCaseAddress, tags, uri: newData.jsonUri };
+                if (collectionId === null) {
+                    return [{ objectid: newData.collectionId, name: newData.name, ownerAddress: lowerCaseAddress, tokens: [newToken] }, ...oldData];
+                } else {
+                    const collection = oldData.find(({ objectid }) => objectid === collectionId);
+                    const newCollection = { ...collection, tokens: [...collection.tokens, newToken] };
+                    const newData = JSON.parse(JSON.stringify(oldData));
+                    newData[oldData.indexOf(collection)] = newCollection;
+                    return newData;
+                }
+            });            
 
             queryClient.setQueryData(['tokens', 'ipfs', newData.collectionId], oldData => {
-                console.log('oldtokendata ipfs', oldData)
-                console.log('new token data being set ', 
-                [...oldData? [...oldData.imageTokens] : [], { objectid: newData.tokenId, imageUri: newData.imageUri, tags }]);
                 return {
                     eventTokens: oldData?.eventTokens || [],
                     imageTokens: [...oldData? [...oldData.imageTokens] : [], { objectid: newData.tokenId, imageUri: newData.imageUri, tags }]
@@ -169,7 +154,7 @@ export default function MintImageModal({ collections, setIsOpen }) {
                                     <p className='font-bold text-xl text-gray-700'>Upload image</p>
                                     <p className='text-gray-500 text-xs mb-3'>PNG and JPG files are allowed</p>
                                 </div>
-                                <ImageUpload files={files} setFiles={setFiles} />
+                                <ImageUpload file={file} setFile={setFile} />
                                 <ChooseCollectionDropdown collections={collections} collectionName={collectionName} divRef={chooseCollectionDiv} isChoosingCollection={isChoosingCollection} setIsChoosingCollection={setIsChoosingCollection} handleCollectionClick={handleCollectionClick} />
                                 <div>
                                     <MultiTagInput tags={tags} setTags={setTags} />

@@ -18,16 +18,15 @@ export default async function handler(req, res) {
             if (err) {
                 resolve(res.status(400).json({ error: err.message }));
             }
-            const metadatas = Object.keys(files).length > 0 ? Object.values(files).map(file => {
-                return {
-                    name: fields.name, description: fields.description, attributes: {
-                        tags: Object.keys(fields).filter(key => key.startsWith('tag')).map(key => fields[key])
-                    }, fileStream: fs.createReadStream(file.filepath)
-                };
-            }) : [{ name: fields.name, description: fields.description, attributes: { eventDate: fields.date } }];
+            const metadata = files.length === 1 ? {
+                name: fields.name, description: fields.description, attributes: {
+                    tags: Object.keys(fields).filter(key => key.startsWith('tag')).map(key => fields[key])
+                }, fileStream: fs.createReadStream(files[0].filepath)
+            } : { name: fields.name, description: fields.description, attributes: { eventDate: fields.date } };
+
             try {
-                const { imgHashes, jsonHashes } = await pinNftToIpfs(metadatas);
-                resolve(res.status(200).json({ success: true, imgHashes, jsonHashes }));
+                const { imgHash, jsonHash } = await pinNftToIpfs(metadata);
+                resolve(res.status(200).json({ success: true, imgHash, jsonHash }));
             } catch (error) {
                 resolve(res.status(200).json({ error: JSON.stringify(error) }));
             }
