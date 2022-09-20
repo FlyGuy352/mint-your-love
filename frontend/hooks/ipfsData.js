@@ -2,7 +2,7 @@ import { useQuery } from 'react-query';
 import { useNotification } from '@web3uikit/core';
 import safeFetch from '../utils/fetchWrapper';
 
-export const useIpfsTokens = ({ collectionId, browseFilters, tokens }) => {
+export const useIpfsTokens = ({ chainId, collectionId, browseFilters, tokens }) => {
     const fetchTokens = async () => {
         console.log('Fetching all IPFS tokens: ', tokens);
         const fetchTokenInfo = ({ objectid, tags, uri }) => {
@@ -48,7 +48,7 @@ export const useIpfsTokens = ({ collectionId, browseFilters, tokens }) => {
         }
     };
 
-    const { data, isFetching, error } = useQuery(['tokens', 'ipfs', collectionId || browseFilters], fetchTokens, { 
+    const { data, isFetching, error } = useQuery(['tokens', 'ipfs', chainId, collectionId || browseFilters], fetchTokens, { 
         enabled: !!tokens && tokens.every(({ timestamp }) => timestamp), keepPreviousData: true, refetchOnWindowFocus: false
     });
 

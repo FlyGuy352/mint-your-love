@@ -37,14 +37,14 @@ export default function Browse() {
     });
 
     const categories = Object.values(optionsSelected.category).filter(value => value.selected).map(value => value.label);
-    const tags = [...categories, ...searchTerm ? [searchTerm.split(' ').filter(term => term)] : []];
+    const tags = [...categories, ...searchTerm ? [...searchTerm.split(' ').filter(term => term)] : []];
     const profiles = Object.entries(optionsSelected.profile).filter(([, value]) => value.selected).map(([key]) => key);
     const seconds = Object.values(timeSelected).find(({ selected }) => selected).seconds;
 
     const { data: moralisTokens, isFetching: isFetchingMoralis } = useMoralisTokens(
         chain?.id, categories.includes('Others') ? 'ALL' : tags, profiles, seconds
     );
-    const { data, isFetching: isFetchingIpfs } = useIpfsTokens({ browseFilters: { tags, profiles, seconds }, tokens: moralisTokens });
+    const { data, isFetching: isFetchingIpfs } = useIpfsTokens({ chainId: chain?.id || 97, browseFilters: { tags, profiles, seconds }, tokens: moralisTokens });
     return (
         <>
             <div className='hidden md:block mt-10'>

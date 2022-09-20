@@ -131,7 +131,7 @@ export default function MintNewDayModal({ collections, setIsOpen }) {
                 }
             });     
 
-            queryClient.setQueryData(['tokens', 'ipfs', newData.collectionId], oldData => {
+            queryClient.setQueryData(['tokens', 'ipfs', chain.id, newData.collectionId], oldData => {
                 return {
                     imageTokens: oldData?.imageTokens || [],
                     eventTokens: [{ objectid: newData.tokenId, title, start: eventDate, allDay: true }, ...oldData? [...oldData.eventTokens] : []]

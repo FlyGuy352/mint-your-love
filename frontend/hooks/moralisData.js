@@ -74,6 +74,7 @@ export const useMoralisTokens = (chainId, tags, profile, timestamp) => {
     const Token = Moralis.Object.extend('Token');
     const tokenQuery = new Moralis.Query(Token);
     if (tags !== 'ALL') {
+        tags = tags.flatMap(tag => [tag, tag.toLowerCase(), tag.toUpperCase()]);
         tokenQuery.containedIn('tags', tags);
     }
     tokenQuery.containedIn('profile', profile);

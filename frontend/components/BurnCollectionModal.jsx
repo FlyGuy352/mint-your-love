@@ -36,10 +36,7 @@ export default function BurnCollectionModal({ collectionId, collectionName, setI
         onSuccess: () => {
             queryClient.setQueryData(['collections', { chainId: chain.id, address: lowerCaseAddress }], oldData => {
                 const newData = JSON.parse(JSON.stringify(oldData));
-                console.log('newData before splice ', newData)
-                console.log('index ', oldData.findIndex(({ objectid }) => objectid === collectionId));
                 newData.splice(oldData.findIndex(({ objectid }) => objectid === collectionId), 1);
-                console.log('new data after splice ')
                 return newData;
             });
             setIsOpen(false);

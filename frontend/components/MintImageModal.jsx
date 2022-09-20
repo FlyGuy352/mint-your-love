@@ -131,7 +131,7 @@ export default function MintImageModal({ collections, setIsOpen }) {
                 }
             });            
 
-            queryClient.setQueryData(['tokens', 'ipfs', newData.collectionId], oldData => {
+            queryClient.setQueryData(['tokens', 'ipfs', chain.id, newData.collectionId], oldData => {
                 return {
                     eventTokens: oldData?.eventTokens || [],
                     imageTokens: [{ objectid: newData.tokenId, imageUri: newData.imageUri, tags }, ...oldData? [...oldData.imageTokens] : []]
