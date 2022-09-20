@@ -6,7 +6,6 @@ import { useNotification } from '@web3uikit/core';
 import { useMutation, useQueryClient } from 'react-query';
 
 export default function BurnCollectionModal({ collectionId, collectionName, setIsOpen }) {
-
     const { chain } = useNetwork();
     const { address } = useAccount();
     const lowerCaseAddress = address.toLowerCase();

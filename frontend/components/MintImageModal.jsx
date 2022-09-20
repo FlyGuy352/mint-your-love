@@ -68,8 +68,8 @@ export default function MintImageModal({ collections, setIsOpen }) {
         setIsCommitting(true);
 
         const formData = new FormData();
-        formData.append('name', 'Testing');
-        formData.append('description', 'Testing');
+        formData.append('name', 'Love Token Photo');
+        formData.append('description', collectionId === null ? newCollectionName : collectionName);
         tags.forEach((tag, index) => formData.append(`tag${index}`, tag));
         formData.append('file', file);
 

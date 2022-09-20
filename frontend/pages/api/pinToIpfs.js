@@ -18,10 +18,10 @@ export default async function handler(req, res) {
             if (err) {
                 resolve(res.status(400).json({ error: err.message }));
             }
-            const metadata = files.length === 1 ? {
+            const metadata = Object.keys(files).length === 1 ? {
                 name: fields.name, description: fields.description, attributes: {
                     tags: Object.keys(fields).filter(key => key.startsWith('tag')).map(key => fields[key])
-                }, fileStream: fs.createReadStream(files[0].filepath)
+                }, fileStream: fs.createReadStream(Object.values(files)[0].filepath)
             } : { name: fields.name, description: fields.description, attributes: { eventDate: fields.date } };
 
             try {

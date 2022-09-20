@@ -7,6 +7,7 @@ Moralis.Cloud.afterSave('CollectionBurned', async request => {
         const query = new Moralis.Query(CollectionObject);
         query.equalTo('objectid', request.object.get('collectionId'));
         const collection = await query.first();
+        
         await collection.destroy();
     }
 });

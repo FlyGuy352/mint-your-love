@@ -16,6 +16,8 @@ export const useIpfsTokens = ({ collectionId, browseFilters, tokens }) => {
                         resolve({ imageToken: { objectid, imageUri, tags } });
                     } else if (tokenMetadata?.attributes?.eventDate) {
                         resolve({ eventToken: { objectid, title: tokenMetadata.name, start: tokenMetadata.attributes.eventDate, allDay: true } });
+                    } else {
+                        resolve({});
                     }
                 } catch (error) {
                     if (error.name === 'AbortError') {
