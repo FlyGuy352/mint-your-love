@@ -124,7 +124,7 @@ export default function MintImageModal({ collections, setIsOpen }) {
                     return [{ objectid: newData.collectionId, name: newData.name, ownerAddress: lowerCaseAddress, tokens: [newToken] }, ...oldData];
                 } else {
                     const collection = oldData.find(({ objectid }) => objectid === collectionId);
-                    const newCollection = { ...collection, tokens: [...collection.tokens, newToken] };
+                    const newCollection = { ...collection, tokens: [newToken, ...collection.tokens] };
                     const newData = JSON.parse(JSON.stringify(oldData));
                     newData[oldData.indexOf(collection)] = newCollection;
                     return newData;
@@ -134,7 +134,7 @@ export default function MintImageModal({ collections, setIsOpen }) {
             queryClient.setQueryData(['tokens', 'ipfs', newData.collectionId], oldData => {
                 return {
                     eventTokens: oldData?.eventTokens || [],
-                    imageTokens: [...oldData? [...oldData.imageTokens] : [], { objectid: newData.tokenId, imageUri: newData.imageUri, tags }]
+                    imageTokens: [{ objectid: newData.tokenId, imageUri: newData.imageUri, tags }, ...oldData? [...oldData.imageTokens] : []]
                 };
             });
             setIsOpen(false);
