@@ -2,7 +2,7 @@ Moralis.Cloud.afterSave('CollectionBurned', async request => {
     const logger = Moralis.Cloud.getLogger();
     const confirmed = request.object.get('confirmed')
     logger.info(`Processing CollectionBurned Tx - Confirmed ? : ${confirmed}`);
-    if (confirmed) {
+    if (!confirmed) { // We sacrifice finality for speed as it otherwise takes too long for the frontend to render the correct data
         const CollectionObject = Moralis.Object.extend('Collection');
         const query = new Moralis.Query(CollectionObject);
         query.equalTo('objectid', request.object.get('collectionId'));
@@ -16,7 +16,7 @@ Moralis.Cloud.afterSave('CollectionCreated', async request => {
     const logger = Moralis.Cloud.getLogger();
     const confirmed = request.object.get('confirmed')
     logger.info(`Processing CollectionCreated Tx - Confirmed ? : ${confirmed}`);
-    if (confirmed) {
+    if (!confirmed) {
         const CollectionObject = Moralis.Object.extend('Collection');
         const collection = new CollectionObject();
         collection.set('objectid', request.object.get('collectionId'));
@@ -32,7 +32,7 @@ Moralis.Cloud.afterSave('LoverLinked', async request => {
     const logger = Moralis.Cloud.getLogger();
     const confirmed = request.object.get('confirmed')
     logger.info(`Processing LoverLinked Tx - Confirmed ? : ${confirmed}`);
-    if (confirmed) {
+    if (!confirmed) {
         const CollectionObject = Moralis.Object.extend('Collection');
         const query = new Moralis.Query(CollectionObject);
         query.equalTo('objectid', request.object.get('collectionId'));
@@ -46,7 +46,7 @@ Moralis.Cloud.afterSave('NftMinted', async request => {
     const logger = Moralis.Cloud.getLogger();
     const confirmed = request.object.get('confirmed')
     logger.info(`Processing NftMinted Tx - Confirmed ? : ${confirmed}`);
-    if (confirmed) {
+    if (!confirmed) {
         const TokenObject = Moralis.Object.extend('Token');
         const tokenQuery = new Moralis.Query(TokenObject);
         tokenQuery.equalTo('objectid', request.object.get('tokenId'));
@@ -72,7 +72,7 @@ Moralis.Cloud.afterSave('Transferred', async request => {
     const confirmed = request.object.get('confirmed')
     logger.info(`Processing Transferred Tx - Confirmed ? : ${confirmed}`);
     const tokenId = request.object.get('tokenId');
-    if (confirmed) {
+    if (!confirmed) {
         const TokenObject = Moralis.Object.extend('Token');
         const query = new Moralis.Query(TokenObject);
         query.equalTo('objectid', request.object.get('tokenId'));
