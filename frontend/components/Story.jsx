@@ -6,6 +6,7 @@ import MigrateCollectionModal from './MigrateCollectionModal';
 import BurnCollectionModal from './BurnCollectionModal';
 import MintImageModal from './MintImageModal';
 import Image from 'next/image';
+import loadingImg from '../public/assets/images/indexing.png';
 import { useOutsideAlerter } from '../hooks/outsideAlerter';
 
 export default function Story({ collections, selectedCollection, setSelectedCollection, imageTokens }) {
@@ -104,7 +105,7 @@ export default function Story({ collections, selectedCollection, setSelectedColl
                             {imageTokensDisplay.map(({ objectid, imageUri, tags }) => {
                                 return (
                                     <div key={objectid} className='flex flex-col gap-2 bg-white'>
-                                        <Image src={imageUri} alt='' height='305' width='428' />
+                                        <Image src={imageUri || loadingImg} alt='' height='305' width='428' />
                                         <div className='flex items-start h-16 gap-2 px-2 flex-wrap overflow-auto'>
                                             {tags.map(tag => <div key={tag} className='font-bold text-xxs bg-lightPink py-1 px-5 rounded-full'>{tag}</div>)}
                                         </div>

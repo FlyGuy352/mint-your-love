@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query';
+import { useQuery, useQueryClient } from 'react-query';
 import { useNotification } from '@web3uikit/core';
 import safeFetch from '../utils/fetchWrapper';
 
@@ -17,7 +17,7 @@ export const useIpfsTokens = ({ chainId, collectionId, browseFilters, tokens }) 
                     } else if (tokenMetadata?.attributes?.eventDate) {
                         resolve({ eventToken: { objectid, title: tokenMetadata.name, start: tokenMetadata.attributes.eventDate, allDay: true } });
                     } else {
-                        resolve({});
+                        resolve({ imageToken: { objectid, tags } });
                     }
                 } catch (error) {
                     if (error.name === 'AbortError') {
