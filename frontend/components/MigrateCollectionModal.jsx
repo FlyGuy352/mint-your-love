@@ -53,7 +53,7 @@ export default function MigrateCollectionModal({ collectionId, setIsOpen }) {
         dispatch({
             type: 'success',
             message: 'Collection migrated',
-            title: `You have migrated your collection to ${targetChain.name}`,
+            title: `You have migrated your collection. Please check back later to view it on ${targetChain.name}.`,
             position: 'topR'
         });
     };
