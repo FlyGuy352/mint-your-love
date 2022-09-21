@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from 'react-query';
+import { useQuery } from 'react-query';
 import { useNotification } from '@web3uikit/core';
 import safeFetch from '../utils/fetchWrapper';
 
