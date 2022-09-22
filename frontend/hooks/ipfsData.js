@@ -17,12 +17,12 @@ export const useIpfsTokens = ({ chainId, collectionId, browseFilters, tokens }) 
                     } else if (tokenMetadata?.attributes?.eventDate) {
                         resolve({ eventToken: { objectid, title: tokenMetadata.name, start: tokenMetadata.attributes.eventDate, allDay: true } });
                     } else {
-                        resolve({ imageToken: { objectid, tags } });
+                        resolve({});
                     }
                 } catch (error) {
                     if (error.name === 'AbortError') {
                         console.log('Aborting long IPFS request...');
-                        resolve({});
+                        resolve({ imageToken: { objectid, tags } });
                     } else {
                         console.log('error ', error);
                         reject(error);
