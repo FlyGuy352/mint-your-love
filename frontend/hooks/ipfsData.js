@@ -2,14 +2,14 @@ import { useQuery } from 'react-query';
 import { useNotification } from '@web3uikit/core';
 import safeFetch from '../utils/fetchWrapper';
 
-export const useIpfsTokens = ({ chainId, collectionId, browseFilters, tokens }) => {
+export const useIpfsTokens = ({ chainId, collectionId, browseFilters, tokens }, timeoutInMs) => {
     const fetchTokens = async () => {
         console.log('Fetching all IPFS tokens: ', tokens);
         const fetchTokenInfo = ({ objectid, tags, uri }) => {
             const tokenUri = uri.replace('ipfs://', 'https://ipfs.io/ipfs/');
             return new Promise(async (resolve, reject) => {
                 try {
-                    const tokenMetadata = await safeFetch(fetch(tokenUri, { signal: AbortSignal.timeout(15000) }));
+                    const tokenMetadata = await safeFetch(fetch(tokenUri, { signal: AbortSignal.timeout(timeoutInMs) }));
                     console.log('Fetched single token metadata: ', tokenMetadata);
                     if (tokenMetadata.image) {
                         const imageUri = tokenMetadata.image.replace('ipfs://', 'https://ipfs.io/ipfs/');

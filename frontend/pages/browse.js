@@ -44,7 +44,7 @@ export default function Browse() {
     const { data: moralisTokens, isFetching: isFetchingMoralis } = useMoralisTokens(
         chain?.id, categories.includes('Others') ? 'ALL' : tags, profiles, seconds
     );
-    const { data, isFetching: isFetchingIpfs } = useIpfsTokens({ chainId: chain?.id || 97, browseFilters: { tags, profiles, seconds }, tokens: moralisTokens });
+    const { data, isFetching: isFetchingIpfs } = useIpfsTokens({ chainId: chain?.id || 97, browseFilters: { tags, profiles, seconds }, tokens: moralisTokens }, 5000);
     return (
         <>
             <div className='hidden md:block mt-10'>

@@ -29,7 +29,7 @@ export default function MyCollectionConnected() {
         }
     }, [collections]);
 
-    const { data, isFetching: isFetchingIpfs } = useIpfsTokens({ chainId: chain.id, collectionId: selectedCollection?.objectid, tokens: selectedCollection?.tokens });
+    const { data, isFetching: isFetchingIpfs } = useIpfsTokens({ chainId: chain.id, collectionId: selectedCollection?.objectid, tokens: selectedCollection?.tokens }, 10000);
 
     return (
         <TokenContractContext.Provider value={{ loveTokenAddress, loveTokenAbi }}>
