@@ -63,7 +63,7 @@ export default function Browse() {
                 {
                     isFetchingMoralis || isFetchingIpfs ? <div className='loader'></div> :
                     data.length === 0 ? <p>No Results Found</p> : 
-                    data.map(({ objectid, imageUri, tags }) => {
+                    data.filter(({ imageUri }) => imageUri).map(({ objectid, imageUri, tags }) => {
                         return (
                             <div key={objectid} className='flex flex-col gap-2 bg-white'>
                                 <Image src={imageUri} alt='' height='305' width='428' />
